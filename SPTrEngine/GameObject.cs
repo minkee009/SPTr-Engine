@@ -1,5 +1,5 @@
 ﻿using SPTrEngine.Tools;
-using SPTrEngine.Math.Vector;
+using SPTrEngine.Math;
 
 namespace SPTrEngine
 {

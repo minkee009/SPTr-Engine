@@ -1,9 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
-using SPTrEngine;
-using SPTrEngine.Math.Vector;
+﻿using SPTrEngine;
+using SPTrEngine.Math;
 
 namespace SPTrApp
 {

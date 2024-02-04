@@ -1,6 +1,6 @@
 ﻿using Silk.NET.Maths;
 
-namespace SPTrEngine.Math.Vector
+namespace SPTrEngine.Math
 {
     public struct Vector2
     {
