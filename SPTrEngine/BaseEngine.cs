@@ -1,22 +1,29 @@
 ﻿using System.Diagnostics;
-using Silk.NET.Core.Native;
+using System.Drawing;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
+using Silk.NET.OpenGL;
 using SPTrEngine.Math.Vector;
+
 
 namespace SPTrEngine
 {
-    public class BaseEngine
+    public static class BaseEngine
     {
         public static List<GameObject> objects = new List<GameObject>();
+
+        public static string windowTitle = "SPTr Engine";
 
         private static bool _isRunning = false;
 
         //윈도우(창) 및 게임 스크린
         private static IWindow _window;
-        private static WindowOptions _wOptions = WindowOptions.Default with { Size = new Vector2D<int>(640, 480) };
+        private static WindowOptions _wOptions = WindowOptions.Default with { Size = new Vector2D<int>(640, 480) , Title = windowTitle };
         private static Vector2Int _screenSize;
+
+        //렌더러
+        private static GL _gl;
 
         //엔진 틱
         private static double _accumlator = 0;
@@ -34,10 +41,27 @@ namespace SPTrEngine
 
             CreateWindow();
 
+            StartOpenGL();
+
+            //_window.Load += () =>
+            //{
+            //    _gl = GL.GetApi(_window);
+            //};
+
+            //_window.Render += (dt) =>
+            //{
+            //    _gl.ClearColor(Color.CornflowerBlue);
+            //    _gl.Clear(ClearBufferMask.ColorBufferBit);
+            //};
+
+            //_window.Run();
+
             var silkInput = _window.CreateInput();
 
             while (_isRunning && !_window.IsClosing)
             {
+                _window.Title = $"{windowTitle} - 엔진 실행 중 , 프레임 카운트 : {FrameCount}";
+
                 var currentTime = stopwatch.Elapsed.TotalSeconds;
                 Time.deltaTime = currentTime - Time.time;
                 Time.time = currentTime;
@@ -83,12 +107,19 @@ namespace SPTrEngine
             CloseWindow();
         }
 
+        
+
         public static void Render()
         {
             _window.DoEvents();
-            _window.SwapBuffers();
+            _window.DoUpdate();
+
+            _gl.ClearColor(Color.CornflowerBlue);
+            _gl.Clear(ClearBufferMask.ColorBufferBit);
 
             _window.DoRender();
+
+            //_window.SwapBuffers();
         }
 
         public static void SetScreenSize(int x, int y)
@@ -106,6 +137,12 @@ namespace SPTrEngine
         {
 
         }
+
+        private static void StartOpenGL()
+        {
+            _gl = GL.GetApi(_window);
+        }
+
         private static void CreateWindow()
         {
             if (_window == null)
