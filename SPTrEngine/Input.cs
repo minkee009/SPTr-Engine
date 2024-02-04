@@ -23,10 +23,10 @@ namespace SPTrEngine
         const int KEY_PRESSED = 0x8000;
 
         /// <summary>
-        /// 매개변수로 전달한 키값의 키가 눌러져 있는지 확인합니다.
+        /// 매개변수로 전달한 키값의 상태를 확인합니다.
         /// </summary>
         /// <param name="vKey">키의 고유번호</param>
-        /// <returns></returns>
+        /// <returns>키의 상태</returns>
         [DllImport("user32.dll", SetLastError = true)]
         private static extern short GetAsyncKeyState(int vKey);
 

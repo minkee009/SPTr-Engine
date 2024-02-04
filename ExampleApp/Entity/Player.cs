@@ -13,11 +13,6 @@ namespace SPTrApp
             _enabled = true;
         }
 
-        public override void FixedTick()
-        {
-            base.FixedTick();
-        }
-
         public override void Tick()
         {
             int h = (Input.GetKey(ConsoleKey.UpArrow) ? 1 : 0) + (Input.GetKey(ConsoleKey.DownArrow) ? -1 : 0);

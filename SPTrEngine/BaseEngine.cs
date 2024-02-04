@@ -5,6 +5,9 @@ namespace SPTrEngine
 {
     public interface ISptrObject
     {
+        public void Awake();
+        public void OnEnable();
+        public void OnDisable();
         public void Start();   
         public void FixedTick();
         public void Tick();
@@ -79,6 +82,9 @@ namespace SPTrEngine
                         obj.AfterTick();
                 }
 
+                //사운드 처리
+
+                //화면 처리
                 Render();
 
                 _frameCount++;

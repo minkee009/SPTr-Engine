@@ -7,6 +7,8 @@ namespace SPTrEngine
     {
         public Vector2 position = new Vector2(0, 0);
         public string name = "";
+        public string tag = "";
+        public int layer = 0;
 
         public bool Enabled
         {
@@ -37,9 +39,8 @@ namespace SPTrEngine
 
         protected char _mesh = '.';
         protected bool _enabled = true;
-        protected string _consoleMSG = "";
+        protected bool _lastEnabled = true;
 
-        private bool _lastEnabled = true;
         private string _hash;
         private bool _startHasExcute = false;
 
@@ -126,16 +127,30 @@ namespace SPTrEngine
             return _hash == other?._hash;
         }
 
-        public bool CheckConsoleMSG() => _consoleMSG != "";
-
         public static GameObject? FindObjectByName(string name)
         {
-            GameObject findObj = null;
+            GameObject? findObj = null;
             string toHash = HashMaker.ComputeSHA256(name);
 
             foreach (var obj in BaseEngine.objects)
             {
                 if (obj._hash == toHash)
+                {
+                    findObj = obj;
+                    break;
+                }
+            }
+
+            return findObj;
+        }
+
+        public static GameObject? FindObjectByTag(string tag)
+        {
+            GameObject? findObj = null;
+            
+            foreach(var obj in BaseEngine.objects)
+            {
+                if (obj.tag == tag)
                 {
                     findObj = obj;
                     break;
