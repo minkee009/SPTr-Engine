@@ -3,17 +3,6 @@ using SPTrEngine.Math.Vector;
 
 namespace SPTrEngine
 {
-    public interface ISptrObject
-    {
-        public void Awake();
-        public void OnEnable();
-        public void OnDisable();
-        public void Start();   
-        public void FixedTick();
-        public void Tick();
-        public void AfterTick();
-    }
-
     public class BaseEngine
     {
         public static BaseEngine instance = new BaseEngine();
