@@ -24,7 +24,7 @@ namespace SPTrApp
                 position += Vector2.Up;
             }
 
-            position.y %= BaseEngine.instance.ScreenSize.y;
+            position.y %= BaseEngine.ScreenSize.y;
         }
     }
 }

@@ -19,9 +19,7 @@ namespace SPTrApp
             player.name += " | player";
             player.position = new Vector2 { x = 5, y = 4 };
 
-            BaseEngine.instance.SetScreenSize(24, 24);
-
-            BaseEngine.instance.Run();
+            BaseEngine.Run();
         }
     }
 }

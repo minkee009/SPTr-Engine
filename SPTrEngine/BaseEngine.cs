@@ -1,42 +1,42 @@
 ﻿using System.Diagnostics;
+using Silk.NET.Core.Native;
+using Silk.NET.Input;
+using Silk.NET.Maths;
+using Silk.NET.Windowing;
 using SPTrEngine.Math.Vector;
 
 namespace SPTrEngine
 {
     public class BaseEngine
     {
-        public static BaseEngine instance = new BaseEngine();
         public static List<GameObject> objects = new List<GameObject>();
 
-        public bool IsRunning => _isRunning;
+        private static bool _isRunning = false;
 
-        public long FrameCount => _frameCount;
+        //윈도우(창) 및 게임 스크린
+        private static IWindow _window;
+        private static WindowOptions _wOptions = WindowOptions.Default with { Size = new Vector2D<int>(640, 480) };
+        private static Vector2Int _screenSize;
 
-        public Vector2Int ScreenSize => _screenSize;
-        public char[,] Screen => _screen;
+        //엔진 틱
+        private static double _accumlator = 0;
+        private static long _frameCount = 0;
 
-        private bool _isExit = false;
-        private bool _isRunning = false;
+        //프로퍼티
+        public static bool IsRunning => _isRunning;
+        public static long FrameCount => _frameCount;
+        public static Vector2Int ScreenSize => _screenSize;
 
-        private char[,] _screen;
-        private char[,] _clearedScreen;
-        private Vector2Int _screenSize;
-        private string _lastScreenString = "";
-        private double _accumlator = 0;
-
-        private long _frameCount = 0;
-
-        BaseEngine(int screenSizeW = 10, int screenSizeH = 10)
-        {
-            SetScreenSize( screenSizeW, screenSizeH );
-        }
-
-        public void Run()
+        public static void Run()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             _isRunning = true;
 
-            while (!_isExit)
+            CreateWindow();
+
+            var silkInput = _window.CreateInput();
+
+            while (_isRunning && !_window.IsClosing)
             {
                 var currentTime = stopwatch.Elapsed.TotalSeconds;
                 Time.deltaTime = currentTime - Time.time;
@@ -44,7 +44,7 @@ namespace SPTrEngine
 
                 _accumlator += Time.deltaTime;
 
-                Input.SetInput();
+                Input.SetInput(silkInput.Keyboards);
 
                 //fixedTick
                 while (_accumlator > 0.0)
@@ -71,6 +71,7 @@ namespace SPTrEngine
                         obj.AfterTick();
                 }
 
+                
                 //사운드 처리
 
                 //화면 처리
@@ -78,70 +79,48 @@ namespace SPTrEngine
 
                 _frameCount++;
             }
+
+            CloseWindow();
         }
 
-        public void Render()
+        public static void Render()
         {
-            //화면 초기화
-            Array.Copy(_clearedScreen,_screen,_clearedScreen.Length);
+            _window.DoEvents();
+            _window.SwapBuffers();
 
-            //렌더링 오브젝트 정보입력 (추후에 Sorting Order 추가하기)
-            foreach (var obj in objects)
-            {
-                var posToInt = obj.position.ToVector2Int();
-                if (obj.Mesh != '.' 
-                    && posToInt.x < ScreenSize.x && posToInt.x >= 0
-                    && posToInt.y < ScreenSize.y && posToInt.y >= 0)
-                {
-                    _screen[posToInt.y,posToInt.x] = obj.Mesh;
-                }
-            }
-
-            //최종 출력
-            var finalString = "";
-            for (int i = _screenSize.y - 1; i > -1; i--)
-            {
-                for (int j = 0; j < _screenSize.x; j++)
-                {
-                    finalString += _screen[i, j] + " ";
-                    if (j == _screenSize.x - 1)
-                        finalString += "\n";
-                }
-            }
-
-            if (finalString != _lastScreenString)
-            {
-                Console.Clear();
-                Console.WriteLine(finalString);
-            }
-
-            _lastScreenString = finalString;
+            _window.DoRender();
         }
 
-        public void SetScreenSize(int x, int y)
+        public static void SetScreenSize(int x, int y)
         {
             _screenSize = new Vector2Int(x, y);
-            _screen = new char[_screenSize.y, _screenSize.x];
-            _clearedScreen = new char[_screenSize.y, _screenSize.x];
+            _wOptions.Size = new Vector2D<int>(x, y);
+        }
 
-            for (int i = _screenSize.y - 1; i > -1; i--)
+        public static void Exit()
+        {
+            _isRunning = false;
+        }
+
+        public static void Dispose()
+        {
+
+        }
+        private static void CreateWindow()
+        {
+            if (_window == null)
             {
-                for (int j = 0; j < _screenSize.x; j++)
-                {
-                    _clearedScreen[i, j] = '.';
-                }
+                _window = Window.Create(_wOptions);
+                _window.Closing += Exit;
+                _window.Initialize();
             }
         }
 
-        public void Exit()
+        private static void CloseWindow()
         {
-            _isExit = true;
+            _window.Close();
         }
 
-        public void Dispose()
-        {
-
-        }
     }
 }
 

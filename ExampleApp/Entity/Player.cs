@@ -15,8 +15,8 @@ namespace SPTrApp
 
         public override void Tick()
         {
-            int h = (Input.GetKey(ConsoleKey.UpArrow) ? 1 : 0) + (Input.GetKey(ConsoleKey.DownArrow) ? -1 : 0);
-            int v = (Input.GetKey(ConsoleKey.RightArrow) ? 1 : 0) + (Input.GetKey(ConsoleKey.LeftArrow) ? -1 : 0);
+            int h = (Input.GetKey(KeyCode.UpArrow) ? 1 : 0) + (Input.GetKey(KeyCode.DownArrow) ? -1 : 0);
+            int v = (Input.GetKey(KeyCode.RightArrow) ? 1 : 0) + (Input.GetKey(KeyCode.LeftArrow) ? -1 : 0);
 
             position += new Vector2(v, h).Normalized * moveSpeed * (float)Time.deltaTime;
         }
