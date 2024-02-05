@@ -7,7 +7,6 @@ using Silk.NET.Windowing;
 using Silk.NET.OpenGL;
 using SPTrEngine.Math;
 
-
 namespace SPTrEngine
 {
     public static class BaseEngine
@@ -50,9 +49,12 @@ namespace SPTrEngine
 
             var silkInput = _window.CreateInput();
 
+            var fps = 0.0f;
+
             while (_isRunning && !_window.IsClosing)
             {
-                _window.Title = $"{windowTitle} - 엔진 실행 중 , 프레임 카운트 : {FrameCount}";
+                _window.Title = $"{windowTitle} - 엔진 실행 중 , 프레임 카운트 : {FrameCount} , {MathF.Round(fps,2)}fps";
+                
 
                 var currentTime = stopwatch.Elapsed.TotalSeconds;
                 Time.deltaTime = currentTime - Time.time;
@@ -71,6 +73,8 @@ namespace SPTrEngine
                             obj.FixedTick();
                     }
                     _accumlator -= Time.fixedDeltaTime;
+
+                    fps = 1.0f / (float)Time.deltaTime;
                 }
 
                 //tick

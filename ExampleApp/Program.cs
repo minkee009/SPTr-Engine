@@ -14,6 +14,7 @@ namespace SPTrApp
             Player player = new Player('P');
             player.name += " | player";
             player.position = new Vector2 { x = 5, y = 4 };
+            player.tag = "P";
 
             BaseEngine.Run();
         }
