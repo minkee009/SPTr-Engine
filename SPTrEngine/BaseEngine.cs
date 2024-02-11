@@ -18,6 +18,12 @@ namespace SPTrEngine
         private static bool _isRunning = false;
 
         //윈도우(창) 및 게임 스크린
+        public static bool VSync
+        {
+            get => _window.VSync; 
+            set => _window.VSync = value;
+        }
+
         private static IWindow _window;
         private static WindowOptions _wOptions = WindowOptions.Default with { Size = new Vector2D<int>(640, 480) , Title = windowTitle };
         private static Vector2Int _screenSize;
@@ -33,6 +39,9 @@ namespace SPTrEngine
         private static double _accumlator = 0;
         private static long _frameCount = 0;
 
+        //엔진 컨텍스트 
+        private static IInputContext _inputContext;
+
         //프로퍼티
         public static bool IsRunning => _isRunning;
         public static long FrameCount => _frameCount;
@@ -47,11 +56,11 @@ namespace SPTrEngine
 
             StartOpenGL();
 
-            var silkInput = _window.CreateInput();
+            _inputContext = _window.CreateInput();
 
             var fps = 0.0f;
 
-            while (_isRunning && !_window.IsClosing)
+            while (_isRunning)
             {
                 _window.Title = $"{windowTitle} - 엔진 실행 중 , 프레임 카운트 : {FrameCount} , {MathF.Round(fps,2)}fps";
                 
@@ -62,7 +71,7 @@ namespace SPTrEngine
 
                 _accumlator += Time.deltaTime;
 
-                Input.SetInput(silkInput.Keyboards);
+                Input.SetInput(_inputContext.Keyboards);
 
                 //fixedTick
                 while (_accumlator > 0.0)
@@ -91,7 +100,6 @@ namespace SPTrEngine
                         obj.AfterTick();
                 }
 
-                
                 //사운드 처리
 
                 //화면 처리
@@ -110,7 +118,6 @@ namespace SPTrEngine
             _window.DoEvents();
             _window.DoUpdate();
 
-            _gl.ClearColor(Color.CornflowerBlue);
             _gl.Clear(ClearBufferMask.ColorBufferBit);
 
             _gl.BindVertexArray(_vao);
@@ -131,6 +138,8 @@ namespace SPTrEngine
         public static void Exit()
         {
             _isRunning = false;
+            _inputContext?.Dispose();
+            _gl?.Dispose();
         }
 
         public static void Dispose()
@@ -141,6 +150,7 @@ namespace SPTrEngine
         private static unsafe void StartOpenGL()
         {
             _gl = _window.CreateOpenGL();
+            _gl.ClearColor(Color.CornflowerBlue);
             InitOpenGLResource();
         }
 
@@ -176,24 +186,24 @@ namespace SPTrEngine
                 _gl.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)(indices.Length * sizeof(uint)), buf, BufferUsageARB.StaticDraw);
 
             const string vertexCode = @"
-                #version 330 core
+#version 330 core
 
-                layout (location = 0) in vec3 aPosition;
+layout (location = 0) in vec3 aPosition;
 
-                void main()
-                {
-                    gl_Position = vec4(aPosition, 1.0);
-                }";
+void main()
+{
+    gl_Position = vec4(aPosition, 1.0);
+}";
 
             const string fragmentCode = @"
-                #version 330 core
+#version 330 core
 
-                out vec4 out_color;
+out vec4 out_color;
 
-                void main()
-                {
-                    out_color = vec4(1.0, 0.5, 0.2, 1.0);
-                }";
+void main()
+{
+    out_color = vec4(1.0, 0.5, 0.2, 1.0);
+}";
 
             uint vertexShader = _gl.CreateShader(ShaderType.VertexShader);
             _gl.ShaderSource(vertexShader, vertexCode);
