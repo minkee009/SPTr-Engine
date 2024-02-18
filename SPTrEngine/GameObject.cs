@@ -1,5 +1,9 @@
 ﻿using SPTrEngine.Tools;
 using SPTrEngine.Math;
+using System.Reflection;
+using System.Collections;
+using Silk.NET.Vulkan;
+using Silk.NET.OpenGL;
 
 namespace SPTrEngine
 {
@@ -54,6 +58,7 @@ namespace SPTrEngine
 
         private string _hash;
         private bool _startHasExcute = false;
+        private Dictionary<string,Coroutine> _activatedCoroutines = new Dictionary<string, Coroutine>();
 
 
         public GameObject(string name, char mesh = '.', bool enabled = true)
@@ -121,6 +126,62 @@ namespace SPTrEngine
         public virtual void AfterTick()
         {
 
+        }
+
+        public void CheckYield()
+        {
+            List<string> needStop = new List<string>(_activatedCoroutines.Count);
+            Coroutine[] list = new Coroutine[_activatedCoroutines.Count];
+            _activatedCoroutines.Values.CopyTo(list, 0);
+            foreach (var routine in list)
+            {
+                if (routine.Callable()
+                    || (routine.waitOption == null 
+                    && BaseEngine.State == EngineState.Tick))
+                {
+                    if (routine.MoveNext())
+                    {
+                        if (routine.enumerator.Current as YieldInstruction != null)
+                            routine.waitOption = (YieldInstruction)routine.enumerator.Current;
+                    }
+                    else
+                        needStop.Add(routine.methodName);
+                }
+            }
+
+            if(needStop.Count > 0 )
+            {
+                foreach(var name in needStop)
+                    StopCoroutine(name);
+            }
+
+            needStop.Clear();
+        }
+
+        public void StartCoroutine(string methodName)
+        {
+            MethodInfo? routineInfo = GetType().GetMethod(methodName);
+
+            if(routineInfo != null 
+                && routineInfo.ReturnType == typeof(IEnumerator)
+                && !_activatedCoroutines.ContainsKey(methodName))
+            {
+                _activatedCoroutines.Add(methodName, new Coroutine(methodName, (IEnumerator)routineInfo.Invoke(this,null), null));
+                _activatedCoroutines[methodName]?.MoveNext();
+
+                if (_activatedCoroutines[methodName].enumerator.Current as YieldInstruction != null)
+                    _activatedCoroutines[methodName].waitOption = (YieldInstruction)_activatedCoroutines[methodName].enumerator.Current;
+            }
+        }
+
+        public void StopCoroutine(string methodName)
+        {
+            _activatedCoroutines.Remove(methodName);
+        }
+
+        public void StopAllCoroutines()
+        {
+            _activatedCoroutines.Clear();
         }
 
         public void SetEnabled(bool enabled)

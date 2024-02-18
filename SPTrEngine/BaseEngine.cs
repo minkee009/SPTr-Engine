@@ -9,6 +9,15 @@ using SPTrEngine.Math;
 
 namespace SPTrEngine
 {
+    public enum EngineState
+    {
+        CheckInput = 0,
+        FixedTick = 1,
+        Tick = 2,
+        AfterTick = 3,
+        Render = 4,
+    }
+
     public static class BaseEngine
     {
         public static List<GameObject> objects = new List<GameObject>();
@@ -16,6 +25,8 @@ namespace SPTrEngine
         public static string windowTitle = "SPTr Engine";
 
         private static bool _isRunning = false;
+
+        private static EngineState _state;
 
         //윈도우(창) 및 게임 스크린
         public static bool VSync
@@ -47,6 +58,8 @@ namespace SPTrEngine
         public static long FrameCount => _frameCount;
         public static Vector2Int ScreenSize => _screenSize;
 
+        public static EngineState State => _state;
+
         public static void Run()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -71,15 +84,20 @@ namespace SPTrEngine
 
                 _accumlator += Time.deltaTime;
 
+                _state = EngineState.CheckInput;
                 Input.SetInput(_inputContext.Keyboards);
 
                 //fixedTick
+                _state = EngineState.FixedTick;
                 while (_accumlator > 0.0)
                 {
                     foreach (var obj in objects)
                     {
                         if (obj.Enabled)
+                        {
                             obj.FixedTick();
+                            obj.CheckYield();
+                        }
                     }
                     _accumlator -= Time.fixedDeltaTime;
 
@@ -87,23 +105,39 @@ namespace SPTrEngine
                 }
 
                 //tick
+                _state = EngineState.Tick;
                 foreach (var obj in objects)
                 {
                     if(obj.Enabled)
+                    {
                         obj.Tick();
+                        obj.CheckYield();
+                    }
                 }
 
                 //after tick
+                _state = EngineState.AfterTick;
                 foreach (var obj in objects)
                 {
                     if (obj.Enabled)
+                    {
                         obj.AfterTick();
+                        obj.CheckYield();
+                    }
                 }
 
                 //사운드 처리
 
                 //화면 처리
+                _state = EngineState.Render;
                 Render();
+                foreach (var obj in objects)
+                {
+                    if (obj.Enabled)
+                    {
+                        obj.CheckYield();
+                    }
+                }
 
                 _frameCount++;
             }

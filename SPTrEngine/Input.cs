@@ -60,6 +60,7 @@ namespace SPTrEngine
         Comma = Key.Comma,
         Period = Key.Period,
         Slash = Key.Slash,
+        Space = Key.Space,
         LeftShift = Key.ShiftLeft,
         RightShift = Key.ShiftRight,
         LeftControl = Key.ControlLeft,
@@ -134,7 +135,7 @@ namespace SPTrEngine
                     if ((int)key == -1)
                         continue;
 
-                    if (keyboard.IsKeyPressed(key))
+                     if (keyboard.IsKeyPressed(key))
                     {
                         nInput |= 1 << (int)key;
                     }
