@@ -7,15 +7,15 @@ namespace SPTrEngine
         /// <summary>
         /// 현재 입력의 비트마스크
         /// </summary>
-        public static int CurrentInput => _currentInput;
+        public static ulong[] CurrentInput => _currentInput;
 
         /// <summary>
         /// 과거 입력의 비트마스크
         /// </summary>
-        public static int OldInput => _oldInput;
+        public static ulong[] OldInput => _oldInput;
 
-        static int _currentInput = 0;
-        static int _oldInput = 0;
+        static ulong[] _currentInput = new ulong[4];
+        static ulong[] _oldInput = new ulong[4];
 
         /// <summary>
         /// WinAPI - user32.dll용 상수, 키가 눌러져 있는 경우
@@ -32,19 +32,22 @@ namespace SPTrEngine
 
         public static bool GetKey(ConsoleKey keyCode)
         {
-            return (_currentInput & (1 << (int)keyCode)) != 0;
+            var i = (int)keyCode / 64;
+            return (_currentInput[i] & ((ulong)1 << (int)keyCode)) != 0;
         }
 
         public static bool GetKeyUp(ConsoleKey keyCode)
         {
-            return (_oldInput & (1 << (int)keyCode)) != 0
-                && (_currentInput & (1 << (int)keyCode)) == 0;
+            var i = (int)keyCode / 64;
+            return (_oldInput[i] & ((ulong)1 << (int)keyCode)) != 0
+                && (_currentInput[i] & ((ulong)1 << (int)keyCode)) == 0;
         }
 
         public static bool GetKeyDown(ConsoleKey keyCode)
         {
-            return (_oldInput & (1 << (int)keyCode)) == 0
-                && (_currentInput & (1 << (int)keyCode)) != 0;
+            var i = (int)keyCode / 64;
+            return (_oldInput[i] & ((ulong)1 << (int)keyCode)) == 0
+                && (_currentInput[i] & ((ulong)1 << (int)keyCode)) != 0;
         }
 
         /// <summary>
@@ -52,15 +55,23 @@ namespace SPTrEngine
         /// </summary>
         public static void SetInput()
         {
-            int nInput = 0;
+            ulong[] nInput = { 0,0,0,0 };
 
             foreach(ConsoleKey key in Enum.GetValues(typeof(ConsoleKey)))
             {
                 if((GetAsyncKeyState((int)key) & KEY_PRESSED) != 0)
                 {
-                    nInput |= 1 << (int)key;
+                    var i = (int)key / 64;
+                    nInput[i] |= (ulong)1 << (int)key % 64;
                 }
             }
+
+            //foreach(var input in nInput)
+            //{
+            //    Console.Write($" {Convert.ToString((long)input, toBase: 2)}");
+            //}
+
+            //Console.WriteLine();
 
             _oldInput = _currentInput;
             _currentInput = nInput;
