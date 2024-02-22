@@ -101,24 +101,29 @@ namespace SPTrEngine
 
     public static class Input
     {
-        static int _currentInput = 0;
-        static int _oldInput = 0;
+        static uint[] _currentInput = new uint[12];
+        static uint[] _oldInput = new uint[12];
+
+        const uint UNSIGNED_ONE = 1;
 
         public static bool GetKey(KeyCode key)
         {
-            return (_currentInput & (1 << (int)key)) != 0;
+            var i = (int)key / 32;
+            return (_currentInput[i] & (UNSIGNED_ONE << (int)key % 32)) != 0;
         }
 
         public static bool GetKeyUp(KeyCode key)
         {
-            return (_oldInput & (1 << (int)key)) != 0
-                && (_currentInput & (1 << (int)key)) == 0;
+            var i = (int)key / 32;
+            return (_oldInput[i] & (UNSIGNED_ONE << (int)key % 32)) != 0
+                && (_currentInput[i] & (UNSIGNED_ONE << (int)key % 32)) == 0;
         }
 
         public static bool GetKeyDown(KeyCode key)
         {
-            return (_oldInput & (1 << (int)key)) == 0
-                && (_currentInput & (1 << (int)key)) != 0;
+            var i = (int)key / 32;
+            return (_oldInput[i] & (UNSIGNED_ONE << (int)key) % 32) == 0
+                && (_currentInput[i] & (UNSIGNED_ONE << (int)key) % 32) != 0;
         }
 
         /// <summary>
@@ -126,7 +131,10 @@ namespace SPTrEngine
         /// </summary>
         public static void SetInput(IReadOnlyList<IKeyboard> keyboards)
         {
-            int nInput = 0;
+            uint[] nInput = {0,0,0,0,
+                            0,0,0,0,
+                            0,0,0,0,
+                            0,0,0,0};
 
             foreach (IKeyboard keyboard in keyboards)
             {
@@ -135,9 +143,10 @@ namespace SPTrEngine
                     if ((int)key == -1)
                         continue;
 
-                     if (keyboard.IsKeyPressed(key))
+                    if (keyboard.IsKeyPressed(key))
                     {
-                        nInput |= 1 << (int)key;
+                        var i = (int)key / 32;
+                        nInput[i] |= UNSIGNED_ONE << (int)key % 32;
                     }
                 }
             }

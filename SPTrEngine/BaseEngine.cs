@@ -49,6 +49,7 @@ namespace SPTrEngine
         //엔진 틱
         private static double _accumlator = 0;
         private static long _frameCount = 0;
+        private static int _frameLimit = 30;
 
         //엔진 컨텍스트 
         private static IInputContext _inputContext;
@@ -69,6 +70,8 @@ namespace SPTrEngine
 
             StartOpenGL();
 
+            VSync = true;
+
             _inputContext = _window.CreateInput();
 
             var fps = 0.0f;
@@ -83,6 +86,18 @@ namespace SPTrEngine
                 Time.time = currentTime;
 
                 _accumlator += Time.deltaTime;
+
+                if (!VSync)
+                {
+                    double waitTime = (1 / (double)_frameLimit) - Time.deltaTime;
+
+                    waitTime = (int)(waitTime * 1000);
+
+                    if(waitTime > 0)
+                    {
+                        Thread.Sleep((int)waitTime);
+                    }
+                }
 
                 _state = EngineState.CheckInput;
                 Input.SetInput(_inputContext.Keyboards);
