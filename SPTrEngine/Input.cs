@@ -67,13 +67,6 @@ namespace SPTrEngine
                 }
             }
 
-            foreach (var input in nInput)
-            {
-                Console.Write($" {Convert.ToString(input, toBase: 2)}");
-            }
-
-            Console.WriteLine();
-
             _oldInput = _currentInput;
             _currentInput = nInput;
         }
