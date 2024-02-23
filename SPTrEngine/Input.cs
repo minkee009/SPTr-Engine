@@ -58,20 +58,17 @@ namespace SPTrEngine
         /// </summary>
         public static void SetInput()
         {
-            uint[] nInput = { 0,0,0,0,
-                              0,0,0,0 };
+            Array.Copy(_currentInput,_oldInput,_currentInput.Length);
+            Array.Clear(_currentInput, 0, _currentInput.Length);
 
             foreach(ConsoleKey key in Enum.GetValues(typeof(ConsoleKey)))
             {
                 if((GetAsyncKeyState((int)key) & KEY_PRESSED) != 0)
                 {
                     var i = (int)key / 32;
-                    nInput[i] |= UNSINGED_ONE << (int)key % 32;
+                    _currentInput[i] |= UNSINGED_ONE << (int)key % 32;
                 }
             }
-
-            _oldInput = _currentInput;
-            _currentInput = nInput;
         }
     }
 }

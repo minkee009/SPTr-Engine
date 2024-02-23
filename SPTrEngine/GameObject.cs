@@ -147,6 +147,7 @@ namespace SPTrEngine
                 foreach (var name in _needStopRoutines)
                     StopCoroutine(name);
             }
+
             _needStopRoutines.Clear();
         }
 
