@@ -125,7 +125,7 @@ namespace SPTrEngine
                 if (enumerator.Current as YieldInstruction != null)
                 {
                     waitOption = (YieldInstruction)enumerator.Current;
-                    Reset();
+                    waitOption.Reset();
                 }
                     
                 else 
