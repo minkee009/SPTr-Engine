@@ -11,6 +11,7 @@ namespace SPTrEngine
     public abstract class YieldInstruction
     {
         public abstract bool Callable();
+        public abstract void Reset();
     }
 
     public class WaitForSeconds : YieldInstruction
@@ -21,18 +22,23 @@ namespace SPTrEngine
         public WaitForSeconds(float sec) 
         {
             _sec = sec;
-            _checkTime = Time.time + sec;
+            Reset();
         }
 
         public override bool Callable()
         {
-            bool check = _checkTime < Time.time;
+            bool check = _checkTime <= Time.time;
             if(check)
             {
-                _checkTime = Time.time + _sec;
+                Reset();
             }
 
             return check;
+        }
+
+        public override void Reset()
+        {
+            _checkTime = Time.time + _sec;
         }
     }
 
@@ -42,6 +48,10 @@ namespace SPTrEngine
         {
             return BaseEngine.State == EngineState.FixedTick;
         }
+        public override void Reset()
+        {
+
+        }
     }
 
     public class WaitForEndOfFrame : YieldInstruction
@@ -49,6 +59,11 @@ namespace SPTrEngine
         public override bool Callable()
         {
             return BaseEngine.State == EngineState.Render;
+        }
+
+        public override void Reset()
+        {
+            
         }
     }
 
@@ -65,6 +80,11 @@ namespace SPTrEngine
         {
             return func.Invoke();
         }
+
+        public override void Reset()
+        {
+            
+        }
     }
 
     public class Coroutine : YieldInstruction
@@ -72,6 +92,10 @@ namespace SPTrEngine
         public string methodName;
         public IEnumerator enumerator;
         public YieldInstruction? waitOption;
+        public bool Done => _done;
+
+        private bool _done;
+
 
         public Coroutine(string methodName, IEnumerator enumerator, YieldInstruction? waitOption)
         {
@@ -82,17 +106,39 @@ namespace SPTrEngine
 
         public override bool Callable()
         {
-            return waitOption?.Callable() ?? false;
+            if (waitOption as Coroutine != null)
+                return ((Coroutine)waitOption).Done;
+            else
+                return waitOption?.Callable() ?? BaseEngine.State == EngineState.Tick;
         }
 
         public bool MoveNext()
         {
             if (!enumerator.MoveNext())
             {
+                _done = true;
                 return false;
             }
 
-            return true;
+            else
+            {
+                if (enumerator.Current as YieldInstruction != null)
+                {
+                    waitOption = (YieldInstruction)enumerator.Current;
+                    Reset();
+                }
+                    
+                else 
+                    waitOption = null;
+
+                return true;
+            }
+            
+        }
+
+        public override void Reset()
+        {
+            waitOption?.Reset();
         }
     }
 }

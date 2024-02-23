@@ -49,7 +49,7 @@ namespace SPTrEngine
         //엔진 틱
         private static double _accumlator = 0;
         private static long _frameCount = 0;
-        private static int _frameLimit = 30;
+        private static int _frameLimit = 120;
 
         //엔진 컨텍스트 
         private static IInputContext _inputContext;
@@ -91,7 +91,7 @@ namespace SPTrEngine
                 {
                     double waitTime = (1 / (double)_frameLimit) - Time.deltaTime;
 
-                    waitTime = (int)(waitTime * 1000);
+                    waitTime = (waitTime * 1000);
 
                     if(waitTime > 0)
                     {

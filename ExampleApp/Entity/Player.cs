@@ -7,7 +7,7 @@ namespace SPTrApp
     public class Player : GameObject
     {
         public float moveSpeed = 8f;
-        public WaitForSeconds waitSec = new WaitForSeconds(3);
+        public WaitForSeconds waitSec = new WaitForSeconds(2f);
 
         public Player(char mesh)
         {
@@ -21,8 +21,14 @@ namespace SPTrApp
             yield return new WaitForFixedTick();
             Console.WriteLine("공격모션 시작");
             
-            yield return waitSec;
+            yield return StartCoroutine("Bullet");
             Console.WriteLine("공격모션 끝");
+        }
+
+        public IEnumerator Bullet()
+        {
+            Console.WriteLine("총알출발!");
+            yield return waitSec;
         }
 
         public override void Tick()
@@ -31,8 +37,8 @@ namespace SPTrApp
             int v = (Input.GetKey(KeyCode.RightArrow) ? 1 : 0) + (Input.GetKey(KeyCode.LeftArrow) ? -1 : 0);
 
             position += new Vector2(v, h).Normalized * moveSpeed * (float)Time.deltaTime;
-
-            if(Input.GetKey(KeyCode.Space))
+            
+            if (Input.GetKeyDown(KeyCode.Space)) 
                 StartCoroutine("Attack");
         }
     }
