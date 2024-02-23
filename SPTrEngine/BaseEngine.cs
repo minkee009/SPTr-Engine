@@ -87,11 +87,11 @@ namespace SPTrEngine
 
                 _accumlator += Time.deltaTime;
 
-                if (!VSync)
+                if (!VSync && _frameLimit > 0)
                 {
                     double waitTime = (1 / (double)_frameLimit) - Time.deltaTime;
 
-                    waitTime = (waitTime * 1000);
+                    waitTime *= 1000;
 
                     if(waitTime > 0)
                     {
