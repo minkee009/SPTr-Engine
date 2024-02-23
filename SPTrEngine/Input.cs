@@ -131,7 +131,7 @@ namespace SPTrEngine
         /// </summary>
         public static void SetInput(IReadOnlyList<IKeyboard> keyboards)
         {
-            Array.Copy(_currentInput, _oldInput, 0);
+            Array.Copy(_currentInput, _oldInput, _currentInput.Length);
             Array.Clear(_currentInput, 0, _currentInput.Length);
 
             foreach (IKeyboard keyboard in keyboards)

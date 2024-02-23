@@ -29,7 +29,20 @@ namespace SPTrApp
         {
             Console.WriteLine("총알출발!");
             yield return waitSec;
+
+            yield return StartCoroutine("Smoke");
         }
+
+        public IEnumerator Smoke()
+        {
+            Console.WriteLine("연기 나옴");
+            yield return new WaitUntil(() => _spaceCount > 8);
+            _spaceCount = 0;
+
+            Console.WriteLine("연기 사라짐");
+        }
+
+        private int _spaceCount = 0;
 
         public override void Tick()
         {
@@ -38,8 +51,11 @@ namespace SPTrApp
 
             position += new Vector2(v, h).Normalized * moveSpeed * (float)Time.deltaTime;
             
-            if (Input.GetKeyDown(KeyCode.Space)) 
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                _spaceCount++;
                 StartCoroutine("Attack");
+            }
         }
     }
 }
