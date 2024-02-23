@@ -94,7 +94,7 @@ namespace SPTrEngine
         public YieldInstruction? waitOption;
         public bool Done => _done;
 
-        private bool _done;
+        private bool _done = false;
 
 
         public Coroutine(string methodName, IEnumerator enumerator, YieldInstruction? waitOption)
