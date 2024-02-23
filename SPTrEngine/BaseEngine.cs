@@ -3,6 +3,15 @@ using SPTrEngine.Math.Vector;
 
 namespace SPTrEngine
 {
+    public enum EngineState
+    {
+        CheckInput = 0,
+        FixedTick = 1,
+        Tick = 2,
+        AfterTick = 3,
+        Render = 4,
+    }
+
     public class BaseEngine
     {
         public static BaseEngine instance = new BaseEngine();
@@ -14,6 +23,10 @@ namespace SPTrEngine
 
         public Vector2Int ScreenSize => _screenSize;
         public char[,] Screen => _screen;
+
+        public EngineState State => _state;
+
+        private EngineState _state;
 
         private bool _isExit = false;
         private bool _isRunning = false;
@@ -44,37 +57,59 @@ namespace SPTrEngine
 
                 _accumlator += Time.deltaTime;
 
+                _state = EngineState.CheckInput;
                 Input.SetInput();
 
                 //fixedTick
+                _state = EngineState.FixedTick;
                 while (_accumlator > 0.0)
                 {
                     foreach (var obj in objects)
                     {
                         if (obj.Enabled)
+                        {
                             obj.FixedTick();
+                            obj.CheckYield();
+                        }
+                            
                     }
                     _accumlator -= Time.fixedDeltaTime;
                 }
 
                 //tick
-                foreach (var obj in objects)
-                {
-                    if(obj.Enabled)
-                        obj.Tick();
-                }
-
-                //after tick
+                _state = EngineState.Tick;
                 foreach (var obj in objects)
                 {
                     if (obj.Enabled)
+                    {
+                        obj.Tick();
+                        obj.CheckYield();
+                    }
+                }
+
+                //after tick
+                _state = EngineState.AfterTick;
+                foreach (var obj in objects)
+                {
+                    if (obj.Enabled)
+                    {
                         obj.AfterTick();
+                        obj.CheckYield();
+                    }
                 }
 
                 //사운드 처리
 
                 //화면 처리
+                _state = EngineState.Render;
                 Render();
+                foreach (var obj in objects)
+                {
+                    if (obj.Enabled)
+                    {
+                        obj.CheckYield();
+                    }
+                }
 
                 _frameCount++;
             }

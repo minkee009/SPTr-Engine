@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace SPTrEngine
 {
@@ -34,7 +35,8 @@ namespace SPTrEngine
         public static bool GetKey(ConsoleKey keyCode)
         {
             var i = (int)keyCode / 32;
-            return (_currentInput[i] & (UNSINGED_ONE << (int)keyCode) % 32) != 0;
+
+            return (_currentInput[i] & (UNSINGED_ONE << (int)keyCode % 32)) != 0;
         }
 
         public static bool GetKeyUp(ConsoleKey keyCode)
@@ -47,8 +49,8 @@ namespace SPTrEngine
         public static bool GetKeyDown(ConsoleKey keyCode)
         {
             var i = (int)keyCode / 32;
-            return (_oldInput[i] & (UNSINGED_ONE << (int)keyCode) % 32) == 0
-                && (_currentInput[i] & (UNSINGED_ONE << (int)keyCode) % 32) != 0;
+            return (_oldInput[i] & (UNSINGED_ONE << (int)keyCode % 32)) == 0
+                && (_currentInput[i] & (UNSINGED_ONE << (int)keyCode % 32)) != 0;
         }
 
         /// <summary>
@@ -56,14 +58,15 @@ namespace SPTrEngine
         /// </summary>
         public static void SetInput()
         {
-            uint[] nInput = { 0,0,0,0,0,0,0,0 };
+            uint[] nInput = { 0,0,0,0,
+                              0,0,0,0 };
 
             foreach(ConsoleKey key in Enum.GetValues(typeof(ConsoleKey)))
             {
                 if((GetAsyncKeyState((int)key) & KEY_PRESSED) != 0)
                 {
                     var i = (int)key / 32;
-                    nInput[i] |= (uint)1 << (int)key % 32;
+                    nInput[i] |= UNSINGED_ONE << (int)key % 32;
                 }
             }
 

@@ -1,5 +1,7 @@
-﻿using SPTrEngine.Tools;
+﻿﻿using SPTrEngine.Tools;
 using SPTrEngine.Math.Vector;
+using System.Reflection;
+using System.Collections;
 
 namespace SPTrEngine
 {
@@ -54,6 +56,8 @@ namespace SPTrEngine
 
         private string _hash;
         private bool _startHasExcute = false;
+        private Dictionary<string, Coroutine> _activatedCoroutines = new Dictionary<string, Coroutine>();
+        private static List<string> _needStopRoutines = new List<string>(8);
 
 
         public GameObject(string name, char mesh = '.', bool enabled = true)
@@ -126,6 +130,52 @@ namespace SPTrEngine
         public void SetEnabled(bool enabled)
         {
             _enabled = enabled;
+        }
+
+        public void CheckYield()
+        {
+            _needStopRoutines.Clear();
+
+            foreach (var r in _activatedCoroutines.Values.ToArray())
+            {
+                if (r.Callable() && !r.MoveNext())
+                    _needStopRoutines.Add(r.methodName);
+            }
+
+            if (_needStopRoutines.Count > 0)
+            {
+                foreach (var name in _needStopRoutines)
+                    StopCoroutine(name);
+            }
+            _needStopRoutines.Clear();
+        }
+
+        public Coroutine? StartCoroutine(string methodName)
+        {
+            MethodInfo? routineInfo = GetType().GetMethod(methodName);
+
+            if (routineInfo != null
+                && routineInfo.ReturnType == typeof(IEnumerator)
+                && !_activatedCoroutines.ContainsKey(methodName))
+            {
+                _activatedCoroutines.Add(methodName, new Coroutine(methodName, (IEnumerator)routineInfo.Invoke(this, null), null));
+                _activatedCoroutines[methodName]?.MoveNext();
+                return _activatedCoroutines[methodName];
+            }
+
+            else
+                return null;
+
+        }
+
+        public void StopCoroutine(string methodName)
+        {
+            _activatedCoroutines.Remove(methodName);
+        }
+
+        public void StopAllCoroutines()
+        {
+            _activatedCoroutines.Clear();
         }
 
         public void Dispose()
