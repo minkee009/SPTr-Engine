@@ -122,8 +122,8 @@ namespace SPTrEngine
         public static bool GetKeyDown(KeyCode key)
         {
             var i = (int)key / 32;
-            return (_oldInput[i] & (UNSIGNED_ONE << (int)key) % 32) == 0
-                && (_currentInput[i] & (UNSIGNED_ONE << (int)key) % 32) != 0;
+            return (_oldInput[i] & (UNSIGNED_ONE << (int)key % 32)) == 0
+                && (_currentInput[i] & (UNSIGNED_ONE << (int)key % 32)) != 0;
         }
 
         /// <summary>
@@ -131,10 +131,8 @@ namespace SPTrEngine
         /// </summary>
         public static void SetInput(IReadOnlyList<IKeyboard> keyboards)
         {
-            uint[] nInput = {0,0,0,0,
-                            0,0,0,0,
-                            0,0,0,0,
-                            0,0,0,0};
+            Array.Copy(_currentInput, _oldInput, 0);
+            Array.Clear(_currentInput, 0, _currentInput.Length);
 
             foreach (IKeyboard keyboard in keyboards)
             {
@@ -146,13 +144,10 @@ namespace SPTrEngine
                     if (keyboard.IsKeyPressed(key))
                     {
                         var i = (int)key / 32;
-                        nInput[i] |= UNSIGNED_ONE << (int)key % 32;
+                        _currentInput[i] |= UNSIGNED_ONE << (int)key % 32;
                     }
                 }
             }
-
-            _oldInput = _currentInput;
-            _currentInput = nInput;
         }
     }
 }
