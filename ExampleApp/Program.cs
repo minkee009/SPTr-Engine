@@ -11,6 +11,8 @@ namespace SPTrApp
     {
         internal static void Main(string[] args)
         {
+            InternalCMD.MainArgsCMD(args);
+
             Enemy enemy = new Enemy('E');
             enemy.name += " | enemy";
             enemy.position = new Vector2 { x = 3, y = 7 };
