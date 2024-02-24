@@ -106,7 +106,7 @@ namespace SPTrEngine
 
         public override bool Callable()
         {
-            if (waitOption as Coroutine != null)
+            if (waitOption is Coroutine)
                 return ((Coroutine)waitOption).Done;
             else
                 return waitOption?.Callable() ?? BaseEngine.instance.State == EngineState.Tick;
@@ -122,7 +122,7 @@ namespace SPTrEngine
 
             else
             {
-                if (enumerator.Current as YieldInstruction != null)
+                if (enumerator.Current is YieldInstruction)
                 {
                     waitOption = (YieldInstruction)enumerator.Current;
                     waitOption.Reset();

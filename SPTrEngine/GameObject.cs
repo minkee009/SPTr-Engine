@@ -171,6 +171,10 @@ namespace SPTrEngine
 
         public void StopCoroutine(string methodName)
         {
+            if (_activatedCoroutines.ContainsKey(methodName) 
+                && _activatedCoroutines[methodName].waitOption is Coroutine)
+                StopCoroutine(((Coroutine)_activatedCoroutines[methodName].waitOption).methodName);
+
             _activatedCoroutines.Remove(methodName);
         }
 
