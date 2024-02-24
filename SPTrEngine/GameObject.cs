@@ -130,8 +130,6 @@ namespace SPTrEngine
 
         public void CheckYield()
         {
-            _needStopRoutines.Clear();
-
             foreach (var r in _activatedCoroutines.Values.ToArray())
             {
                 if (r.Callable() && !r.MoveNext())
@@ -166,6 +164,11 @@ namespace SPTrEngine
 
         public void StopCoroutine(string methodName)
         {
+            if (_activatedCoroutines.ContainsKey(methodName) 
+                && _activatedCoroutines[methodName].waitOption is Coroutine)
+            {
+                StopCoroutine(((Coroutine)_activatedCoroutines[methodName].waitOption).methodName);
+            }
             _activatedCoroutines.Remove(methodName);
         }
 
