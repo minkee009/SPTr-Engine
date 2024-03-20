@@ -17,8 +17,6 @@ namespace SPTrEngine
         public static BaseEngine instance = new BaseEngine();
         public static List<GameObject> objects = new List<GameObject>();
 
-        public bool IsRunning => _isRunning;
-
         public long FrameCount => _frameCount;
 
         public Vector2Int ScreenSize => _screenSize;
@@ -29,7 +27,6 @@ namespace SPTrEngine
         private EngineState _state;
 
         private bool _isExit = false;
-        private bool _isRunning = false;
 
         private char[,] _screen;
         private char[,] _clearedScreen;
@@ -47,7 +44,6 @@ namespace SPTrEngine
         public void Run()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            _isRunning = true;
 
             while (!_isExit)
             {
