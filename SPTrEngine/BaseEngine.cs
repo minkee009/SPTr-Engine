@@ -26,6 +26,7 @@ namespace SPTrEngine
 
         public Vector2Int ScreenSize => _screenSize;
         public char[,] Screen => _screen;
+        public char[] ScreenText => _screenText;
 
         public EngineState State => _state;
 
@@ -35,6 +36,7 @@ namespace SPTrEngine
 
         private char[,] _screen;
         private char[,] _clearedScreen;
+        private char[] _screenText;
         private Vector2Int _screenSize;
         private string _lastScreenString = "";
         private double _accumlator = 0;
@@ -162,6 +164,7 @@ namespace SPTrEngine
             _screen = new char[_screenSize.y, _screenSize.x];
             _clearedScreen = new char[_screenSize.y, _screenSize.x];
 
+            _screenText = new char[screenSizeW * screenSizeH * 4];
             //SetScreenSize( screenSizeW, screenSizeH );
         }
 
@@ -282,14 +285,14 @@ namespace SPTrEngine
             uint dw = 0;
             COORD cursorPos = new COORD(0, 0);
             SetConsoleCursorPosition(_screenBuffer[_screenIndex],cursorPos);
-            string data = new string(DrawConsole());
-            byte[] buffer = Encoding.UTF8.GetBytes(data);
+            DrawConsole();
+            byte[] buffer = Encoding.UTF8.GetBytes(_screenText);
 
             WriteFile(_screenBuffer[_screenIndex], buffer, (uint)buffer.Length, out dw, IntPtr.Zero);
             SwapScreen();
         }
 
-        public char[] DrawConsole()
+        public void DrawConsole()
         {
             //화면 초기화
             Array.Copy(_clearedScreen, _screen, _clearedScreen.Length);
@@ -306,22 +309,20 @@ namespace SPTrEngine
                 }
             }
 
-            var finalString = new char[ScreenSize.x * ScreenSize.y * 4];
+            //var finalString = new char[ScreenSize.x * ScreenSize.y * 4];
             var currentIDX = 0;
 
             for (int i = _screenSize.y - 1; i > -1; i--)
             {
                 for (int j = 0; j < _screenSize.x; j++)
                 {
-                    finalString[currentIDX++] = _screen[i, j];
-                    finalString[currentIDX++] = ' ';
+                    _screenText[currentIDX++] = _screen[i, j];
+                    _screenText[currentIDX++] = ' ';
 
                     if (j == _screenSize.x - 1)
-                        finalString[currentIDX++] = '\n';
+                        _screenText[currentIDX++] = '\n';
                 }
             }
-
-            return finalString;
         }
 
         public void SwapScreen()
@@ -382,6 +383,7 @@ namespace SPTrEngine
             _screenSize = new Vector2Int(x, y);
             _screen = new char[_screenSize.y, _screenSize.x];
             _clearedScreen = new char[_screenSize.y, _screenSize.x];
+            _screenText = new char[_screenSize.x * _screenSize.y * 4];
 
             for (int i = _screenSize.y - 1; i > -1; i--)
             {
