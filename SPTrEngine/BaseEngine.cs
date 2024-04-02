@@ -1,10 +1,8 @@
 ﻿using System.Diagnostics;
-using System;
 using System.Runtime.InteropServices;
 using SPTrEngine.Math.Vector;
-using static System.Net.WebRequestMethods;
-using Microsoft.Win32.SafeHandles;
 using System.Text;
+using SPTrEngine.Extensions.Kernel32;
 
 namespace SPTrEngine
 {
@@ -43,113 +41,7 @@ namespace SPTrEngine
 
         private long _frameCount = 0;
 
-        const int STD_OUTPUT_HANDLE = -11;
-        const uint GENERIC_READ = 0x80000000;
-        const uint GENERIC_WRITE = 0x40000000;
-        const uint FILE_SHARE_READ = 0x00000001;
-        const uint FILE_SHARE_WRITE = 0x00000002;
-        const uint CONSOLE_TEXTMODE_BUFFER = 1;
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern IntPtr GetStdHandle(int nStdHandle);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool SetConsoleCursorInfo(IntPtr hConsoleOutput, [In] ref CONSOLE_CURSOR_INFO lpConsoleCursorInfo);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern IntPtr CreateConsoleScreenBuffer(
-            uint dwDesiredAccess,
-            uint dwShareMode,
-            IntPtr lpSecurityAttributes,
-            uint dwFlags,
-            IntPtr lpScreenBufferData
-        );
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool SetConsoleScreenBufferSize(IntPtr hConsoleOutput, COORD dwSize);
-
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool SetConsoleActiveScreenBuffer(IntPtr hConsoleOutput);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool GetConsoleScreenBufferInfo(IntPtr hConsoleOutput, out CONSOLE_SCREEN_BUFFER_INFO lpConsoleScreenBufferInfo);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool SetConsoleWindowInfo(IntPtr hConsoleOutput, bool bAbsolute, [In] ref SMALL_RECT lpConsoleWindow);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool FillConsoleOutputCharacter(IntPtr hConsoleOutput, char cCharacter, uint nLength, COORD dwWriteCoord, out uint lpNumberOfCharsWritten);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool CloseHandle(IntPtr hObject);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool SetConsoleCursorPosition(IntPtr hConsoleOutput, COORD dwCursorPosition);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool WriteFile(IntPtr hFile, byte[] lpBuffer, uint nNumberOfBytesToWrite, out uint lpNumberOfBytesWritten, IntPtr lpOverlapped);
-
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct CONSOLE_CURSOR_INFO
-        {
-            public uint Size;
-            public bool Visible;
-
-            public CONSOLE_CURSOR_INFO(uint size, bool visible)
-            {
-                Size = size;
-                Visible = visible;
-            }
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct COORD
-        {
-            public short X;
-            public short Y;
-
-            public COORD(short x, short y)
-            {
-                X = x;
-                Y = y;
-            }
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct SMALL_RECT
-        {
-            public short Left;
-            public short Top;
-            public short Right;
-            public short Bottom;
-
-            public SMALL_RECT(short left, short top, short right, short bottom)
-            {
-                Left = left;
-                Top = top;
-                Right = right;
-                Bottom = bottom;
-            }
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct CONSOLE_SCREEN_BUFFER_INFO
-        {
-            public COORD dwSize;
-            public COORD dwCursorPosition;
-            public ushort wAttributes;
-            public SMALL_RECT srWindow;
-            public COORD dwMaximumWindowSize;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct Rect
-        {
-            public uint Width;
-            public uint Height;
-        }
+        
 
         private static int _screenIndex = 0;
         private static Rect _windowRect;
@@ -173,19 +65,22 @@ namespace SPTrEngine
             for(int i = 0; i < 2; i++)
             {
                 if(_screenBuffer[i] != IntPtr.Zero)
-                    CloseHandle(_screenBuffer[i]);
+                    Kernel32.CloseHandle(_screenBuffer[i]);
             }
         }
 
         public void Run()
         {
+            Kernel32.Beep(200, 55);
+            Kernel32.Beep(350, 30);
+            Kernel32.Beep(240, 55);
             Stopwatch stopwatch = Stopwatch.StartNew();
 
             CONSOLE_CURSOR_INFO cci = new CONSOLE_CURSOR_INFO(1, false);
 
             CONSOLE_SCREEN_BUFFER_INFO consoleInfo = new CONSOLE_SCREEN_BUFFER_INFO();
 
-            GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), out consoleInfo);
+            Kernel32.GetConsoleScreenBufferInfo(Kernel32.GetStdHandle(Kernel32.STD_OUTPUT_HANDLE), out consoleInfo);
 
             consoleInfo.dwSize.X = (short)ScreenSize.x;
             consoleInfo.dwSize.Y = (short)ScreenSize.y;
@@ -194,16 +89,16 @@ namespace SPTrEngine
 
             for (int i = 0; i < 2; i++)
             {
-                _screenBuffer[i] = CreateConsoleScreenBuffer(
-                    GENERIC_READ | GENERIC_WRITE,
+                _screenBuffer[i] = Kernel32.CreateConsoleScreenBuffer(
+                    Kernel32.GENERIC_READ | Kernel32.GENERIC_WRITE,
                     0,
                     IntPtr.Zero,
-                    CONSOLE_TEXTMODE_BUFFER,
+                    Kernel32.CONSOLE_TEXTMODE_BUFFER,
                     IntPtr.Zero);
 
-                SetConsoleScreenBufferSize(_screenBuffer[i], consoleInfo.dwSize);
-                SetConsoleWindowInfo(_screenBuffer[i], true, ref consoleInfo.srWindow);
-                SetConsoleCursorInfo(_screenBuffer[i], ref cci);
+                Kernel32.SetConsoleScreenBufferSize(_screenBuffer[i], consoleInfo.dwSize);
+                Kernel32.SetConsoleWindowInfo(_screenBuffer[i], true, ref consoleInfo.srWindow);
+                Kernel32.SetConsoleCursorInfo(_screenBuffer[i], ref cci);
             }
 
             AppDomain.CurrentDomain.ProcessExit += DestroyConsoleHandle;
@@ -280,11 +175,11 @@ namespace SPTrEngine
 
             uint dw = 0;
             COORD cursorPos = new COORD(0, 0);
-            SetConsoleCursorPosition(_screenBuffer[_screenIndex],cursorPos);
+            Kernel32.SetConsoleCursorPosition(_screenBuffer[_screenIndex],cursorPos);
             DrawConsole();
             byte[] buffer = Encoding.UTF8.GetBytes(_screenText);
 
-            WriteFile(_screenBuffer[_screenIndex], buffer, (uint)buffer.Length, out dw, IntPtr.Zero);
+            Kernel32.WriteFile(_screenBuffer[_screenIndex], buffer, (uint)buffer.Length, out dw, IntPtr.Zero);
             SwapScreen();
         }
 
@@ -325,7 +220,7 @@ namespace SPTrEngine
 
         public void SwapScreen()
         {
-            SetConsoleActiveScreenBuffer(_screenBuffer[_screenIndex]);
+            Kernel32.SetConsoleActiveScreenBuffer(_screenBuffer[_screenIndex]);
             _screenIndex = _screenIndex == 0 ? 1 : 0;
         }
 
@@ -334,8 +229,8 @@ namespace SPTrEngine
             COORD pos = new COORD(0,0);
             uint dw;
             uint length = _windowRect.Height * _windowRect.Width;
-            FillConsoleOutputCharacter(_screenBuffer[_screenIndex], ' ', length, pos, out dw);
-            SetConsoleCursorPosition(_screenBuffer[_screenIndex], pos);
+            Kernel32.FillConsoleOutputCharacter(_screenBuffer[_screenIndex], ' ', length, pos, out dw);
+            Kernel32.SetConsoleCursorPosition(_screenBuffer[_screenIndex], pos);
         }
 
         public void OldRender()
