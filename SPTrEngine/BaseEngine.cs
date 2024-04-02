@@ -164,7 +164,7 @@ namespace SPTrEngine
             _screen = new char[_screenSize.y, _screenSize.x];
             _clearedScreen = new char[_screenSize.y, _screenSize.x];
 
-            _screenText = new char[screenSizeW * screenSizeH * 4];
+            _screenText = new char[screenSizeW * screenSizeH * 2 + screenSizeH];
             //SetScreenSize( screenSizeW, screenSizeH );
         }
 
@@ -185,16 +185,12 @@ namespace SPTrEngine
 
             CONSOLE_SCREEN_BUFFER_INFO consoleInfo = new CONSOLE_SCREEN_BUFFER_INFO();
 
-            _screenBuffer[0] = new IntPtr();
-            _screenBuffer[1] = new IntPtr();
-
             GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), out consoleInfo);
 
             consoleInfo.dwSize.X = (short)ScreenSize.x;
             consoleInfo.dwSize.Y = (short)ScreenSize.y;
 
             _windowRect.Width = (uint)(consoleInfo.srWindow.Right - consoleInfo.srWindow.Left);
-
 
             for (int i = 0; i < 2; i++)
             {
@@ -323,6 +319,8 @@ namespace SPTrEngine
                         _screenText[currentIDX++] = '\n';
                 }
             }
+
+            var gg = currentIDX;
         }
 
         public void SwapScreen()
@@ -383,7 +381,7 @@ namespace SPTrEngine
             _screenSize = new Vector2Int(x, y);
             _screen = new char[_screenSize.y, _screenSize.x];
             _clearedScreen = new char[_screenSize.y, _screenSize.x];
-            _screenText = new char[_screenSize.x * _screenSize.y * 4];
+            _screenText = new char[_screenSize.x * _screenSize.y * 2 + ScreenSize.y];
 
             for (int i = _screenSize.y - 1; i > -1; i--)
             {
