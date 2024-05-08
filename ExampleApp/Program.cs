@@ -5,6 +5,7 @@ namespace SPTrApp
 {
     internal static class Program
     {
+        [STAThread]
         internal static void Main(string[] args)
         {
             InternalCMD.MainArgsCMD(args);
@@ -17,7 +18,7 @@ namespace SPTrApp
             player.name += " | player";
             player.position = new Vector2 { x = 5, y = 4 };
 
-            BaseEngine.instance.SetScreenSize(24, 24);
+            BaseEngine.instance.EngineScreen.SetScreenSize(24,24);
 
             BaseEngine.instance.Run();
         }
