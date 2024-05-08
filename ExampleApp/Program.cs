@@ -1,4 +1,5 @@
 ﻿using SPTrApp.ExampleApp;
+using SPTrApp.SPTrEngine;
 using SPTrEngine;
 using SPTrEngine.Math.Vector;
 
@@ -23,7 +24,7 @@ namespace SPTrApp
             //player.name += " | player";
             //player.position = new Vector2 { x = 5, y = 4 };
 
-            //BaseEngine.instance.SetScreenSize(24, 24);
+            //BaseEngine.instance.EngineScreen.SetScreenSize(24,24);
 
             //BaseEngine.instance.Run();
         }
