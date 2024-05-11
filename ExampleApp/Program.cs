@@ -3,6 +3,7 @@ using SPTrEngine;
 using SPTrEngine.Math.Vector;
 using SFML.Window;
 using SFML;
+using System.Text;
 
 namespace SPTrApp
 {
@@ -16,13 +17,18 @@ namespace SPTrApp
 
             Color BGColor = new Color(0, 192, 255);
 
-            while(window.IsOpen)
+            CircleShape shape = new CircleShape(100.0f);
+            shape.FillColor = new Color(25, 180, 40);
+
+            while (window.IsOpen)
             {
                 //이벤트 실행
                 window.DispatchEvents();
 
                 //내부 화면 초기화
                 window.Clear(BGColor);
+
+                window.Draw(shape);
 
                 //윈도우 화면 출력
                 window.Display();
