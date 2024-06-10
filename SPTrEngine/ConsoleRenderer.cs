@@ -167,12 +167,14 @@ namespace SPTrApp.SPTrEngine
             //렌더링 오브젝트 정보입력 (추후에 Sorting Order 추가하기)
             foreach (var obj in objects)
             {
-                var posToInt = obj.position.ToVector2Int();
-                if (obj.Mesh != '.'
+                var posToInt = new Vector2Int((int)obj.Transform.Position.x,(int)obj.Transform.Position.y);
+
+                if (obj.TryGetComponent(out Mesh? m) 
+                    && (m?.MeshSet ?? '.') != '.'
                     && posToInt.x < _screenSize.x && posToInt.x >= 0
                     && posToInt.y < _screenSize.y && posToInt.y >= 0)
                 {
-                    _screen[posToInt.y, posToInt.x] = obj.Mesh;
+                    _screen[posToInt.y, posToInt.x] = m?.MeshSet ?? '.';
                 }
             }
 

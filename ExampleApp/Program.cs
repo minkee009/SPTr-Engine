@@ -1,4 +1,5 @@
-﻿using SPTrEngine;
+﻿using SPTrApp.SPTrEngine;
+using SPTrEngine;
 using SPTrEngine.Math.Vector;
 
 namespace SPTrApp
@@ -10,13 +11,16 @@ namespace SPTrApp
         {
             InternalCMD.MainArgsCMD(args);
 
-            Enemy enemy = new Enemy('E');
-            enemy.name += " | enemy";
-            enemy.position = new Vector2 { x = 3, y = 7 };
+            GameObject player = new GameObject("Player");
+            player.AddComponent<Player>();
+            Mesh.CreateInstance(player, 'P');
+            player.Transform.Position = new Vector3 { x = 5, y =4 };
 
-            Player player = new Player('P');
-            player.name += " | player";
-            player.position = new Vector2 { x = 5, y = 4 };
+
+            GameObject enemy = new GameObject("Enemy");
+            enemy.AddComponent<Enemy>();
+            Mesh.CreateInstance(enemy, 'E');
+            enemy.Transform.Position = new Vector3 { x = 3, y = 7 };
 
             BaseEngine.instance.EngineScreen.SetScreenSize(24,24);
 

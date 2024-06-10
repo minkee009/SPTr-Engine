@@ -2,185 +2,66 @@
 using SPTrEngine.Math.Vector;
 using System.Reflection;
 using System.Collections;
+using SPTrApp.SPTrEngine;
+using System.Runtime.CompilerServices;
 
 namespace SPTrEngine
 {
-    public interface ISptrObject
+    public sealed class GameObject : IDisposable, IEquatable<GameObject>
     {
-        public void Awake();
-        public void OnEnable();
-        public void OnDisable();
-        public void Start();
-        public void FixedTick();
-        public void Tick();
-        public void AfterTick();
-    }
-
-    public class GameObject : IDisposable, IEquatable<GameObject>, ISptrObject
-    {
-        public Vector2 position = new Vector2(0, 0);
         public string name = "";
         public string tag = "";
         public int layer = 0;
+
+        public Transform Transform { get; }
+        public IList<Component> Components { get => _components; }
 
         public bool Enabled
         {
             get => _enabled;
             set
             {
-                _lastEnabled = _enabled;
                 _enabled = value;
 
-                if (_lastEnabled != _enabled)
+                foreach(var component in Components)
                 {
-                    if(_enabled)
-                    {
-                        OnEnable();
-                        if (!_startHasExcute)
-                        {
-                            Start();
-                            _startHasExcute = true;
-                        }
-                    }
-                    else
-                        OnDisable();
+                    if (component is ScriptBehavior)
+                        ((ScriptBehavior)component).Enabled = value;
                 }
             }
         }
+
         public string Hash => _hash;
-        public char Mesh => _mesh;
 
-        protected char _mesh = '.';
-        protected bool _enabled = true;
-        protected bool _lastEnabled = true;
-
+        private bool _enabled = true;
+        private List<Component> _components = new List<Component>();
         private string _hash;
-        private bool _startHasExcute = false;
         private Dictionary<string, Coroutine> _activatedCoroutines = new Dictionary<string, Coroutine>();
         private static List<string> _needStopRoutines = new List<string>(8);
 
 
-        public GameObject(string name, char mesh = '.', bool enabled = true)
+        public GameObject()
         {
-            position = Vector2.Zero;
+            name = $"[{BaseEngine.objects.Count}]GameObject";
+            _hash = HashMaker.ComputeSHA256(name);
+            Transform = Transform.CreateInstance(this);
+            Components.Add(Transform);
+            BaseEngine.objects.Add(this);
+        }
+
+        public GameObject(string name)
+        {
             this.name = name;
             _hash = HashMaker.ComputeSHA256(name);
-            _mesh = mesh;
-
+            Transform = Transform.CreateInstance(this);
+            Components.Add(Transform);
             BaseEngine.objects.Add(this);
-            Awake();
-
-            _enabled = enabled;
-            _lastEnabled = enabled;
-            if (_enabled)
-            {
-                OnEnable();
-                Start();
-            }
         }
 
-        public GameObject(char mesh = '.')
-        {
-            position = Vector2.Zero;
-            name = $"GameObject[{BaseEngine.objects.Count}]";
-            _hash = HashMaker.ComputeSHA256(name);
-            _mesh = mesh;
-
-            BaseEngine.objects.Add(this);
-            Awake();
-            OnEnable();
-            Start();
-        }
-
-        public virtual void OnEnable()
-        {
-
-        }
-
-        public virtual void OnDisable()
-        {
-
-        }
-
-        public virtual void Awake()
-        {
-
-        }
-
-        public virtual void Start()
-        {
-
-        }
-
-        public virtual void FixedTick()
-        {
-
-        }
-
-        public virtual void Tick()
-        {
-
-        }
-
-        public virtual void AfterTick()
-        {
-
-        }
 
         public void SetEnabled(bool enabled)
         {
             _enabled = enabled;
-        }
-
-        public void CheckYield()
-        {
-            _needStopRoutines.Clear();
-
-            foreach (var r in _activatedCoroutines.Values.ToArray())
-            {
-                if (r.Callable() && !r.MoveNext())
-                    _needStopRoutines.Add(r.methodName);
-            }
-
-            if (_needStopRoutines.Count > 0)
-            {
-                foreach (var name in _needStopRoutines)
-                    StopCoroutine(name);
-            }
-
-            _needStopRoutines.Clear();
-        }
-
-        public Coroutine? StartCoroutine(string methodName)
-        {
-            MethodInfo? routineInfo = GetType().GetMethod(methodName);
-
-            if (routineInfo != null
-                && routineInfo.ReturnType == typeof(IEnumerator)
-                && !_activatedCoroutines.ContainsKey(methodName))
-            {
-                _activatedCoroutines.Add(methodName, new Coroutine(methodName, (IEnumerator)routineInfo.Invoke(this, null), null));
-                _activatedCoroutines[methodName]?.MoveNext();
-                return _activatedCoroutines[methodName];
-            }
-
-            else
-                return null;
-
-        }
-
-        public void StopCoroutine(string methodName)
-        {
-            if (_activatedCoroutines.ContainsKey(methodName) 
-                && _activatedCoroutines[methodName].waitOption is Coroutine)
-                StopCoroutine(((Coroutine)_activatedCoroutines[methodName].waitOption).methodName);
-
-            _activatedCoroutines.Remove(methodName);
-        }
-
-        public void StopAllCoroutines()
-        {
-            _activatedCoroutines.Clear();
         }
 
         public void Dispose()
@@ -224,6 +105,64 @@ namespace SPTrEngine
             }
 
             return findObj;
+        }
+
+        public T? GetComponent<T>() where T : Component
+        {
+            for (int i = 0; i < _components.Count; i++)
+            {
+                if (_components[i] is T)
+                    return (T)_components[i];
+            }
+
+            return null;
+        }
+
+        public Component? GetComponent(Type type)
+        {
+            for (int i = 0; i < _components.Count; i++)
+            {
+                if (_components[i].GetType() == type)
+                    return _components[i];
+            }
+
+            return null;
+        }
+
+        public bool TryGetComponent<T>(out T? component) where T : Component
+        {
+            component = default(T);
+            for (int i = 0; i < _components.Count; i++)
+            {
+                if (_components[i] is T)
+                {
+                    component = (T)_components[i];
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public T AddComponent<T>() where T : Component, new()
+        {
+            for(int i = 0; i < _components.Count; i++)
+            {
+                if (_components[i] is T)
+                    return (T)_components[i];
+            }
+
+            T instance = new T();
+            instance.GameObject = this;
+
+            _components.Add(instance);
+            if (instance is ISPTrLoop)
+            {
+                ((ISPTrLoop)instance).OnInitialized();
+            }
+               
+
+            return instance;
         }
     }
 }

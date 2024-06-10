@@ -4,6 +4,7 @@ using SPTrEngine.Math.Vector;
 using System.Text;
 using SPTrEngine.Extensions.Kernel32;
 using SPTrApp.SPTrEngine;
+using Microsoft.Win32.SafeHandles;
 
 namespace SPTrEngine
 {
@@ -68,10 +69,18 @@ namespace SPTrEngine
                     {
                         if (obj.Enabled)
                         {
-                            obj.FixedTick();
-                            obj.CheckYield();
+                            foreach(var com in obj.Components)
+                            {
+                                var script = com as ScriptBehavior;
+
+                                if(script?.Enabled ?? false)
+                                {
+                                    script.FixedTick();
+                                    script.CheckYield();
+                                }
+                            }
                         }
-                            
+
                     }
                     _accumlator -= Time.fixedDeltaTime;
                 }
@@ -82,8 +91,16 @@ namespace SPTrEngine
                 {
                     if (obj.Enabled)
                     {
-                        obj.Tick();
-                        obj.CheckYield();
+                        foreach (var com in obj.Components)
+                        {
+                            var script = com as ScriptBehavior;
+
+                            if (script?.Enabled ?? false)
+                            {
+                                script.Tick();
+                                script.CheckYield();
+                            }
+                        }
                     }
                 }
 
@@ -93,8 +110,16 @@ namespace SPTrEngine
                 {
                     if (obj.Enabled)
                     {
-                        obj.AfterTick();
-                        obj.CheckYield();
+                        foreach (var com in obj.Components)
+                        {
+                            var script = com as ScriptBehavior;
+
+                            if (script?.Enabled ?? false)
+                            {
+                                script.AfterTick();
+                                script.CheckYield();
+                            }
+                        }
                     }
                 }
 
@@ -107,7 +132,15 @@ namespace SPTrEngine
                 {
                     if (obj.Enabled)
                     {
-                        obj.CheckYield();
+                         foreach (var com in obj.Components)
+                        {
+                            var script = com as ScriptBehavior;
+
+                            if (script?.Enabled ?? false)
+                            {
+                                script.CheckYield();
+                            }
+                        }
                     }
                 }
             }

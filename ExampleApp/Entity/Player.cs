@@ -1,20 +1,15 @@
-﻿using SPTrEngine;
+﻿using SPTrApp.SPTrEngine;
+using SPTrEngine;
 using SPTrEngine.Extensions.Kernel32;
 using SPTrEngine.Math.Vector;
 
 namespace SPTrApp
 {
-    public class Player : GameObject
+    public class Player : ScriptBehavior
     {
         public float moveSpeed = 8f;
 
         public float footprintTime = 0;
-
-        public Player(char mesh)
-        {
-            _mesh = mesh;
-            _enabled = true;
-        }
 
         public override void Tick()
         {
@@ -23,7 +18,7 @@ namespace SPTrApp
 
             Vector2 input = new Vector2(v, h).Normalized;
 
-            position += input * moveSpeed * (float)Time.deltaTime;
+            Transform.Position += new Vector3(input.x,input.y,0f) * moveSpeed * (float)Time.deltaTime;
 
             footprintTime += input.Magnitude > 0f ? (float)Time.deltaTime : 0;
 
