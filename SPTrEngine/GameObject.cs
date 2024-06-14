@@ -149,7 +149,7 @@ namespace SPTrEngine
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public Component? AddComponent(Type type)
+        public Component AddComponent(Type type)
         {
             for (int i = 0; i < _components.Count; i++)
             {
@@ -178,11 +178,11 @@ namespace SPTrEngine
             }
             catch
             {
-                return null;
+                throw new NullReferenceException();
             }
 
             if(instance == null)
-                return null;
+                throw new NullReferenceException();
 
             instance.GameObject = this;
 
@@ -222,6 +222,7 @@ namespace SPTrEngine
 
         public void Destroy(Component component)
         {
+
         }
     }
 }
