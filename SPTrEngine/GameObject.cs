@@ -212,9 +212,10 @@ namespace SPTrEngine
                 if (_components[i] is T)
                     return (T)_components[i];
             }
-            T instance = new T();
-
-            instance.GameObject = this;
+            T instance = new()
+            {
+                GameObject = this
+            };
 
             _components.Add(instance);
             if (instance is ISPTrLoop)
