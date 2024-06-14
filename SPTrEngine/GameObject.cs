@@ -138,6 +138,11 @@ namespace SPTrEngine
             return false;
         }
 
+        /// <summary>
+        /// Component를 추가합니다. 리플렉션을 사용하는 함수입니다.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public T AddComponent<T>() where T : Component //, new()
         {
             return (T)AddComponent(typeof(T));
@@ -145,7 +150,7 @@ namespace SPTrEngine
 
 
         /// <summary>
-        /// 리플렉션을 사용하여 Component를 추가합니다.
+        /// 타입을 사용하여 Component를 추가합니다. 리플렉션을 사용하는 함수입니다.
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
