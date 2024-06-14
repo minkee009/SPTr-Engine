@@ -125,12 +125,12 @@ namespace SPTrEngine
 
         public bool TryGetComponent<T>(out T? component) where T : Component
         {
-            component = default(T);
+            component = null;
             for (int i = 0; i < _components.Count; i++)
             {
-                if (_components[i] is T)
+                if (_components[i] is T validComponent)
                 {
-                    component = (T)_components[i];
+                    component = validComponent;
                     return true;
                 }
             }
@@ -170,7 +170,7 @@ namespace SPTrEngine
 
                 if(createInstance != null) 
                 {
-                    instance = (Component?)createInstance.Invoke(null, new object[] { this });//(Component?)Activator.CreateInstance(type);
+                    instance = (Component?)createInstance.Invoke(null, new object[] { this });
                 }
                 else
                 {
@@ -192,9 +192,9 @@ namespace SPTrEngine
             instance.GameObject = this;
 
             _components.Add(instance);
-            if (instance is ISPTrLoop)
+            if (instance is ISPTrLoop loop)
             {
-                ((ISPTrLoop)instance).OnInitialized();
+                loop.OnInitialized();
             }
 
             return instance;
@@ -218,9 +218,9 @@ namespace SPTrEngine
             };
 
             _components.Add(instance);
-            if (instance is ISPTrLoop)
+            if (instance is ISPTrLoop loop)
             {
-                ((ISPTrLoop)instance).OnInitialized();
+                loop.OnInitialized();
             }
 
             return instance;
