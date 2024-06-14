@@ -14,6 +14,10 @@ namespace SPTrEngine
         public string tag = "";
         public int layer = 0;
 
+        private bool _enabled = true;
+        private List<Component> _components;
+        private string _hash;
+
         public Transform Transform { get; }
         public IList<Component> Components { get => _components; }
 
@@ -33,10 +37,6 @@ namespace SPTrEngine
         }
 
         public string Hash => _hash;
-
-        private bool _enabled = true;
-        private List<Component> _components;
-        private string _hash;
 
 
         public GameObject()

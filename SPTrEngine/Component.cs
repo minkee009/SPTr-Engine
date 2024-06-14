@@ -31,10 +31,10 @@ namespace SPTrApp.SPTrEngine
 
 #pragma warning disable CS8618
         protected Component()
-#pragma warning restore CS8618
         {
 
         }
+#pragma warning restore CS8618
 
         public static object CreateInstance(GameObject gameObject)
         {

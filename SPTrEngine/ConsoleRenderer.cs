@@ -21,14 +21,6 @@ namespace SPTrApp.SPTrEngine
 
     public class ConsoleRenderer : IConsoleScreen, IDisposable
     {
-        public long FrameCount => _frameCount;
-
-        public char[,] Screen => _screen;
-
-        public char[] ScreenText => _screenText;
-
-        public Vector2Int ScreenSize => _screenSize;
-
         private long _frameCount = 0;
 
         private static int _screenIndex = 0;
@@ -41,6 +33,22 @@ namespace SPTrApp.SPTrEngine
         private bool _disposed;
 
         private Vector2Int _screenSize;
+
+        public long FrameCount => _frameCount;
+
+        public char[,] Screen => _screen;
+
+        public char[] ScreenText => _screenText;
+
+        public Vector2Int ScreenSize => _screenSize;
+
+#pragma warning disable CS8618
+        public ConsoleRenderer()
+        {
+            SetScreenSize(10, 10);
+            Console.OutputEncoding = Encoding.UTF8;
+        }
+#pragma warning restore CS8618
 
         public IConsoleScreen SetScreenSize(int wSize, int hSize)
         {
@@ -58,15 +66,6 @@ namespace SPTrApp.SPTrEngine
             }
 
             return this;
-        }
-
-
-#pragma warning disable CS8618
-        public ConsoleRenderer()
-#pragma warning restore CS8618
-        {
-            SetScreenSize(10,10);
-            Console.OutputEncoding = Encoding.UTF8;
         }
 
         ~ConsoleRenderer()

@@ -22,22 +22,18 @@ namespace SPTrEngine
         public static BaseEngine instance = new BaseEngine();
         public static List<GameObject> objects = new List<GameObject>();
 
+        private EngineState _state;
+        private bool _isExit;
+        private ConsoleRenderer _consoleRenderer;
+
         public IConsoleScreen EngineScreen => _consoleRenderer;
 
         public EngineState State => _state;
 
-        private EngineState _state;
-
-        private bool _isExit = false;
-
-        private ConsoleRenderer _consoleRenderer;
-
-        private double _accumlator = 0;
-
-
-
         BaseEngine()
         {
+            _state = EngineState.CheckInput;
+            _isExit = false;
             _consoleRenderer = new ConsoleRenderer();
         }
 
@@ -50,20 +46,22 @@ namespace SPTrEngine
 
             _consoleRenderer.CreateScreenHandle();
 
+            double accumlator = 0;
+
             while (!_isExit)
             {
                 var currentTime = stopwatch.Elapsed.TotalSeconds;
                 Time.deltaTime = currentTime - Time.time;
                 Time.time = currentTime;
 
-                _accumlator += Time.deltaTime;
+                accumlator += Time.deltaTime;
 
                 _state = EngineState.CheckInput;
                 Input.SetInput();
 
                 //fixedTick
                 _state = EngineState.FixedTick;
-                while (_accumlator > 0.0)
+                while (accumlator > 0.0)
                 {
                     foreach (var obj in objects)
                     {
@@ -82,7 +80,7 @@ namespace SPTrEngine
                         }
 
                     }
-                    _accumlator -= Time.fixedDeltaTime;
+                    accumlator -= Time.fixedDeltaTime;
                 }
 
                 //tick

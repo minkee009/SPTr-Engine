@@ -11,6 +11,9 @@ namespace SPTrApp.SPTrEngine
 {
     public class Transform : Component
     {
+        private List<Transform> _childs;
+        private Transform? _parent;
+
         public Transform? Parent { get => _parent; }
         public Vector3 Position { get; set; }
         //public Quaternion rotation { get; set; }
@@ -21,9 +24,6 @@ namespace SPTrApp.SPTrEngine
         //public Vector3 LocalScale { get; set; }
 
         public IList<Transform> Childs { get => _childs; }
-
-        private List<Transform> _childs;
-        private Transform? _parent;
 
         protected Transform()
         {
