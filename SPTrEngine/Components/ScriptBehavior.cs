@@ -57,16 +57,6 @@ namespace SPTrApp.SPTrEngine
             }
         }
 
-        protected ScriptBehavior()
-        {
-
-        }
-
-        protected ScriptBehavior(GameObject go) : base(go)
-        {
-            
-        }
-
         public void OnInitialized()
         {
             if (_hasInitalized)
@@ -74,7 +64,7 @@ namespace SPTrApp.SPTrEngine
 
             Awake();
 
-            Enabled = GameObject.Enabled;
+            Enabled = GameObject?.Enabled ?? false;
 
             if (Enabled)
             {

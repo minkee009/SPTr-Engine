@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Collections;
 using SPTrApp.SPTrEngine;
 using System.Runtime.CompilerServices;
+using static SPTrApp.SPTrEngine.Component;
 
 namespace SPTrEngine
 {
@@ -34,16 +35,15 @@ namespace SPTrEngine
         public string Hash => _hash;
 
         private bool _enabled = true;
-        private List<Component> _components = new List<Component>();
+        private List<Component> _components;
         private string _hash;
-        private Dictionary<string, Coroutine> _activatedCoroutines = new Dictionary<string, Coroutine>();
-        private static List<string> _needStopRoutines = new List<string>(8);
 
 
         public GameObject()
         {
             name = $"[{BaseEngine.objects.Count}]GameObject";
             _hash = HashMaker.ComputeSHA256(name);
+            _components = new List<Component>();
             Transform = Transform.CreateInstance(this);
             Components.Add(Transform);
             BaseEngine.objects.Add(this);
@@ -53,6 +53,7 @@ namespace SPTrEngine
         {
             this.name = name;
             _hash = HashMaker.ComputeSHA256(name);
+            _components = new List<Component>();
             Transform = Transform.CreateInstance(this);
             Components.Add(Transform);
             BaseEngine.objects.Add(this);
@@ -106,18 +107,6 @@ namespace SPTrEngine
 
             return findObj;
         }
-
-        public T? GetComponent<T>() where T : Component
-        {
-            for (int i = 0; i < _components.Count; i++)
-            {
-                if (_components[i] is T)
-                    return (T)_components[i];
-            }
-
-            return null;
-        }
-
         public Component? GetComponent(Type type)
         {
             for (int i = 0; i < _components.Count; i++)
@@ -127,6 +116,11 @@ namespace SPTrEngine
             }
 
             return null;
+        }
+
+        public T? GetComponent<T>() where T : Component
+        {
+            return GetComponent(typeof(T)) as T;
         }
 
         public bool TryGetComponent<T>(out T? component) where T : Component
@@ -144,15 +138,52 @@ namespace SPTrEngine
             return false;
         }
 
-        public T AddComponent<T>() where T : Component, new()
+        public T AddComponent<T>() where T : Component //, new()
         {
-            for(int i = 0; i < _components.Count; i++)
+            return (T)AddComponent(typeof(T));
+        }
+
+
+        /// <summary>
+        /// 리플렉션을 사용하여 Component를 추가합니다.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public Component? AddComponent(Type type)
+        {
+            for (int i = 0; i < _components.Count; i++)
             {
-                if (_components[i] is T)
-                    return (T)_components[i];
+                if (_components[i].GetType() == type)
+                    return _components[i];
             }
 
-            T instance = new T();
+            Component? instance;
+
+            try
+            {
+                MethodInfo? createInstance = type.GetMethod("CreateInstance");
+
+                if(createInstance != null) 
+                {
+                    instance = (Component?)createInstance.Invoke(null, new object[] { this });//(Component?)Activator.CreateInstance(type);
+                }
+                else
+                {
+                    instance = (Component?)(type.GetConstructor(
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, 
+                        null, 
+                        Type.EmptyTypes,
+                        null)?.Invoke(null));
+                }
+            }
+            catch
+            {
+                return null;
+            }
+
+            if(instance == null)
+                return null;
+
             instance.GameObject = this;
 
             _components.Add(instance);
@@ -160,9 +191,37 @@ namespace SPTrEngine
             {
                 ((ISPTrLoop)instance).OnInitialized();
             }
-               
 
             return instance;
+        }
+
+        /// <summary>
+        /// ScriptBehavior를 추가합니다. (리플렉션을 사용하지 않습니다.)
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T AddScript<T>() where T : ScriptBehavior, new()
+        {
+            for (int i = 0; i < _components.Count; i++)
+            {
+                if (_components[i] is T)
+                    return (T)_components[i];
+            }
+            T instance = new T();
+
+            instance.GameObject = this;
+
+            _components.Add(instance);
+            if (instance is ISPTrLoop)
+            {
+                ((ISPTrLoop)instance).OnInitialized();
+            }
+
+            return instance;
+        }
+
+        public void Destroy(Component component)
+        {
         }
     }
 }

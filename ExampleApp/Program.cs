@@ -13,13 +13,13 @@ namespace SPTrApp
 
             GameObject player = new GameObject("Player");
             player.AddComponent<Player>();
-            Mesh.CreateInstance(player, 'P');
+            player.AddComponent<Mesh>().MeshSet = 'P';
             player.Transform.Position = new Vector3 { x = 5, y =4 };
 
 
             GameObject enemy = new GameObject("Enemy");
             enemy.AddComponent<Enemy>();
-            Mesh.CreateInstance(enemy, 'E');
+            enemy.AddComponent<Mesh>().MeshSet = 'E';
             enemy.Transform.Position = new Vector3 { x = 3, y = 7 };
 
             BaseEngine.instance.EngineScreen.SetScreenSize(24,24);

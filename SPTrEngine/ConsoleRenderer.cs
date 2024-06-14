@@ -171,10 +171,10 @@ namespace SPTrApp.SPTrEngine
 
                 if (obj.TryGetComponent(out Mesh? m) 
                     && (m?.MeshSet ?? '.') != '.'
-                    && posToInt.x < _screenSize.x && posToInt.x >= 0
-                    && posToInt.y < _screenSize.y && posToInt.y >= 0)
+                    && posToInt.x <= _screenSize.x && posToInt.x > 0
+                    && posToInt.y <= _screenSize.y && posToInt.y > 0)
                 {
-                    _screen[posToInt.y, posToInt.x] = m?.MeshSet ?? '.';
+                    _screen[posToInt.y - 1, posToInt.x - 1] = m?.MeshSet ?? '.';
                 }
             }
 

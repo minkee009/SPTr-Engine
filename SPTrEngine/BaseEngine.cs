@@ -69,11 +69,11 @@ namespace SPTrEngine
                     {
                         if (obj.Enabled)
                         {
-                            foreach(var com in obj.Components)
+                            foreach (var com in obj.Components)
                             {
                                 var script = com as ScriptBehavior;
 
-                                if(script?.Enabled ?? false)
+                                if (script?.Enabled ?? false)
                                 {
                                     script.FixedTick();
                                     script.CheckYield();
@@ -132,7 +132,7 @@ namespace SPTrEngine
                 {
                     if (obj.Enabled)
                     {
-                         foreach (var com in obj.Components)
+                        foreach (var com in obj.Components)
                         {
                             var script = com as ScriptBehavior;
 

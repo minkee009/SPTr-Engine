@@ -13,16 +13,17 @@ namespace SPTrApp.SPTrEngine
 
         char _meshSet;
 
-        protected Mesh(GameObject go) : base(go) 
+        protected Mesh() 
         {
-
+            _meshSet = '.';
         }
 
-        public static Mesh CreateInstance(GameObject go, char mesh = '.')
+        public static new Mesh CreateInstance(GameObject go)
         {
-            var instance = new Mesh(go);
+            var instance = new Mesh();
 
-            instance.MeshSet = mesh;
+            instance.GameObject = go;
+            instance.MeshSet = '.';
 
             go.Components.Add(instance);
 

@@ -25,12 +25,8 @@ namespace SPTrApp.SPTrEngine
         private List<Transform> _childs;
         private Transform? _parent;
 
-        //버그픽스 : 테스트 필요
-        protected Transform(GameObject go) : base(go)
+        protected Transform()
         {
-            Position = Vector3.zero;
-            Scale = Vector3.one;
-
             _childs = new List<Transform>();
             _parent = null;
         }
@@ -41,12 +37,17 @@ namespace SPTrApp.SPTrEngine
         /// </summary>
         /// <param name="go"></param>
         /// <returns></returns>
-        public static Transform CreateInstance(GameObject go)
+        public static new Transform CreateInstance(GameObject go)
         {
             if (go.Transform != null)
                 return go.Transform;
 
-            return new Transform(go);
+            var instance = new Transform();
+
+            instance.Position = Vector3.zero;
+            instance.Scale = Vector3.one;
+
+            return instance;
         }
 
         public bool SetParent(Transform parent)

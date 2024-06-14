@@ -3,14 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace SPTrApp.SPTrEngine
 {
-
     public class Component
-    {
+    { 
+        private GameObject _gameObject;
+
         public GameObject GameObject
         {
             get
@@ -25,20 +27,20 @@ namespace SPTrApp.SPTrEngine
             }
         }
 
-
-        private GameObject _gameObject;
-
         public Transform Transform => _gameObject.Transform;
 
         protected Component()
         {
-            //throw new NotImplementedException();   
+
         }
 
-        protected Component(GameObject go)
+        public static object CreateInstance(GameObject gameObject)
         {
-            _gameObject = go;
-        }
+            var instance = new Component();
 
+            instance.GameObject = gameObject;
+
+            return instance;
+        }
     }
 }
