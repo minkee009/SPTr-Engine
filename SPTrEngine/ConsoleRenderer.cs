@@ -61,7 +61,9 @@ namespace SPTrApp.SPTrEngine
         }
 
 
+#pragma warning disable CS8618
         public ConsoleRenderer()
+#pragma warning restore CS8618
         {
             SetScreenSize(10,10);
             Console.OutputEncoding = Encoding.UTF8;

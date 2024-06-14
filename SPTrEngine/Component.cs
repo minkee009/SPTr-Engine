@@ -29,7 +29,9 @@ namespace SPTrApp.SPTrEngine
 
         public Transform Transform => _gameObject.Transform;
 
+#pragma warning disable CS8618
         protected Component()
+#pragma warning restore CS8618
         {
 
         }

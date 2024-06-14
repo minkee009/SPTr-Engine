@@ -103,7 +103,7 @@ namespace SPTrApp.SPTrEngine
                 && routineInfo.ReturnType == typeof(IEnumerator)
                 && !_activatedCoroutines.ContainsKey(methodName))
             {
-                _activatedCoroutines.Add(methodName, new Coroutine(methodName, (IEnumerator)routineInfo.Invoke(this, null), null));
+                _activatedCoroutines.Add(methodName, new Coroutine(methodName, (IEnumerator?)routineInfo?.Invoke(this, null) ?? throw new Exception(), null));
                 _activatedCoroutines[methodName]?.MoveNext();
                 return _activatedCoroutines[methodName];
             }
@@ -117,7 +117,7 @@ namespace SPTrApp.SPTrEngine
         {
             if (_activatedCoroutines.ContainsKey(methodName)
                 && _activatedCoroutines[methodName].waitOption is Coroutine)
-                StopCoroutine(((Coroutine)_activatedCoroutines[methodName].waitOption).methodName);
+                StopCoroutine(((Coroutine?)_activatedCoroutines[methodName].waitOption)?.methodName ?? throw new Exception());
 
             _activatedCoroutines.Remove(methodName);
         }
