@@ -56,6 +56,8 @@ namespace SPTrEngine
 
                 accumlator += Time.deltaTime;
 
+                var objsCheckCount = objects.Count;
+
                 _state = EngineState.CheckInput;
                 Input.SetInput();
 
@@ -63,13 +65,15 @@ namespace SPTrEngine
                 _state = EngineState.FixedTick;
                 while (accumlator > 0.0)
                 {
-                    foreach (var obj in objects)
+                    for (int i = 0; i < objsCheckCount; i++)
                     {
-                        if (obj.Enabled)
+                        if (objects[i].Enabled)
                         {
-                            foreach (var com in obj.Components)
+                            var comps = objects[i].Components;
+                            var comCount = comps.Count;
+                            for (int j = 0; j < comCount; j++)
                             {
-                                var script = com as ScriptBehavior;
+                                var script = comps[j] as ScriptBehavior;
 
                                 if (script?.Enabled ?? false)
                                 {
@@ -78,22 +82,23 @@ namespace SPTrEngine
                                 }
                             }
                         }
-
                     }
                     accumlator -= Time.fixedDeltaTime;
                 }
 
                 //tick
                 _state = EngineState.Tick;
-                foreach (var obj in objects)
+                for(int i = 0; i < objsCheckCount; i++)
                 {
-                    if (obj.Enabled)
+                    if (objects[i].Enabled)
                     {
-                        foreach (var com in obj.Components)
+                        var comps = objects[i].Components;
+                        var comCount = comps.Count;
+                        for (int j = 0; j < comCount; j++)
                         {
-                            var script = com as ScriptBehavior;
+                            var script = comps[j] as ScriptBehavior;
 
-                            if (script?.Enabled ?? false)
+                            if(script?.Enabled ?? false)
                             {
                                 script.Tick();
                                 script.CheckYield();
@@ -104,13 +109,15 @@ namespace SPTrEngine
 
                 //after tick
                 _state = EngineState.AfterTick;
-                foreach (var obj in objects)
+                for (int i = 0; i < objsCheckCount; i++)
                 {
-                    if (obj.Enabled)
+                    if (objects[i].Enabled)
                     {
-                        foreach (var com in obj.Components)
+                        var comps = objects[i].Components;
+                        var comCount = comps.Count;
+                        for (int j = 0; j < comCount; j++)
                         {
-                            var script = com as ScriptBehavior;
+                            var script = comps[j] as ScriptBehavior;
 
                             if (script?.Enabled ?? false)
                             {
@@ -126,13 +133,15 @@ namespace SPTrEngine
                 //화면 처리
                 _state = EngineState.Render;
                 _consoleRenderer.Render(objects);
-                foreach (var obj in objects)
+                for (int i = 0; i < objsCheckCount; i++)
                 {
-                    if (obj.Enabled)
+                    if (objects[i].Enabled)
                     {
-                        foreach (var com in obj.Components)
+                        var comps = objects[i].Components;
+                        var comCount = comps.Count;
+                        for (int j = 0; j < comCount; j++)
                         {
-                            var script = com as ScriptBehavior;
+                            var script = comps[j] as ScriptBehavior;
 
                             if (script?.Enabled ?? false)
                             {
