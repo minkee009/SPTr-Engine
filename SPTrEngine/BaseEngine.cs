@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using SPTrEngine.Math.Vector;
 using System.Text;
 using SPTrEngine.Extensions.Kernel32;
-using SPTrApp.SPTrEngine;
+using Microsoft.Win32.SafeHandles;
 
 namespace SPTrEngine
 {
@@ -21,22 +21,18 @@ namespace SPTrEngine
         public static BaseEngine instance = new BaseEngine();
         public static List<GameObject> objects = new List<GameObject>();
 
+        private EngineState _state;
+        private bool _isExit;
+        private ConsoleRenderer _consoleRenderer;
+
         public IConsoleScreen EngineScreen => _consoleRenderer;
 
         public EngineState State => _state;
 
-        private EngineState _state;
-
-        private bool _isExit = false;
-
-        private ConsoleRenderer _consoleRenderer;
-
-        private double _accumlator = 0;
-
-
-
         BaseEngine()
         {
+            _state = EngineState.CheckInput;
+            _isExit = false;
             _consoleRenderer = new ConsoleRenderer();
         }
 
@@ -49,52 +45,85 @@ namespace SPTrEngine
 
             _consoleRenderer.CreateScreenHandle();
 
+            double accumlator = 0;
+
             while (!_isExit)
             {
                 var currentTime = stopwatch.Elapsed.TotalSeconds;
                 Time.deltaTime = currentTime - Time.time;
                 Time.time = currentTime;
 
-                _accumlator += Time.deltaTime;
+                accumlator += Time.deltaTime;
+
+                var objsCheckCount = objects.Count;
 
                 _state = EngineState.CheckInput;
                 Input.SetInput();
 
                 //fixedTick
                 _state = EngineState.FixedTick;
-                while (_accumlator > 0.0)
+                while (accumlator > 0.0)
                 {
-                    foreach (var obj in objects)
+                    for (int i = 0; i < objsCheckCount; i++)
                     {
-                        if (obj.Enabled)
+                        if (objects[i].Enabled)
                         {
-                            obj.FixedTick();
-                            obj.CheckYield();
+                            var comps = objects[i].Components;
+                            var comCount = comps.Count;
+                            for (int j = 0; j < comCount; j++)
+                            {
+                                var script = comps[j] as ScriptBehavior;
+
+                                if (script?.Enabled ?? false)
+                                {
+                                    script.FixedTick();
+                                    script.CheckYield();
+                                }
+                            }
                         }
-                            
                     }
-                    _accumlator -= Time.fixedDeltaTime;
+                    accumlator -= Time.fixedDeltaTime;
                 }
 
                 //tick
                 _state = EngineState.Tick;
-                foreach (var obj in objects)
+                for(int i = 0; i < objsCheckCount; i++)
                 {
-                    if (obj.Enabled)
+                    if (objects[i].Enabled)
                     {
-                        obj.Tick();
-                        obj.CheckYield();
+                        var comps = objects[i].Components;
+                        var comCount = comps.Count;
+                        for (int j = 0; j < comCount; j++)
+                        {
+                            var script = comps[j] as ScriptBehavior;
+
+                            if(script?.Enabled ?? false)
+                            {
+                                script.Tick();
+                                script.CheckYield();
+                            }
+                        }
                     }
                 }
 
                 //after tick
                 _state = EngineState.AfterTick;
-                foreach (var obj in objects)
+                for (int i = 0; i < objsCheckCount; i++)
                 {
-                    if (obj.Enabled)
+                    if (objects[i].Enabled)
                     {
-                        obj.AfterTick();
-                        obj.CheckYield();
+                        var comps = objects[i].Components;
+                        var comCount = comps.Count;
+                        for (int j = 0; j < comCount; j++)
+                        {
+                            var script = comps[j] as ScriptBehavior;
+
+                            if (script?.Enabled ?? false)
+                            {
+                                script.AfterTick();
+                                script.CheckYield();
+                            }
+                        }
                     }
                 }
 
@@ -103,11 +132,21 @@ namespace SPTrEngine
                 //화면 처리
                 _state = EngineState.Render;
                 _consoleRenderer.Render(objects);
-                foreach (var obj in objects)
+                for (int i = 0; i < objsCheckCount; i++)
                 {
-                    if (obj.Enabled)
+                    if (objects[i].Enabled)
                     {
-                        obj.CheckYield();
+                        var comps = objects[i].Components;
+                        var comCount = comps.Count;
+                        for (int j = 0; j < comCount; j++)
+                        {
+                            var script = comps[j] as ScriptBehavior;
+
+                            if (script?.Enabled ?? false)
+                            {
+                                script.CheckYield();
+                            }
+                        }
                     }
                 }
             }

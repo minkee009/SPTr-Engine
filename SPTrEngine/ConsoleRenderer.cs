@@ -1,14 +1,12 @@
-﻿using SPTrEngine;
-using SPTrEngine.Extensions.Kernel32;
+﻿using SPTrEngine.Extensions.Kernel32;
 using SPTrEngine.Math.Vector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
-namespace SPTrApp.SPTrEngine
+namespace SPTrEngine
 {
     public interface IConsoleScreen
     {
@@ -20,16 +18,8 @@ namespace SPTrApp.SPTrEngine
         public IConsoleScreen SetScreenSize(int wSize, int hSize);
     }
 
-    public class ConsoleRenderer : IConsoleScreen
+    public class ConsoleRenderer : IConsoleScreen, IDisposable
     {
-        public long FrameCount => _frameCount;
-
-        public char[,] Screen => _screen;
-
-        public char[] ScreenText => _screenText;
-
-        public Vector2Int ScreenSize => _screenSize;
-
         private long _frameCount = 0;
 
         private static int _screenIndex = 0;
@@ -39,8 +29,25 @@ namespace SPTrApp.SPTrEngine
         private char[,] _screen;
         private char[,] _clearedScreen;
         private char[] _screenText;
+        private bool _disposed;
 
         private Vector2Int _screenSize;
+
+        public long FrameCount => _frameCount;
+
+        public char[,] Screen => _screen;
+
+        public char[] ScreenText => _screenText;
+
+        public Vector2Int ScreenSize => _screenSize;
+
+#pragma warning disable CS8618
+        public ConsoleRenderer()
+        {
+            SetScreenSize(10, 10);
+            Console.OutputEncoding = Encoding.UTF8;
+        }
+#pragma warning restore CS8618
 
         public IConsoleScreen SetScreenSize(int wSize, int hSize)
         {
@@ -60,11 +67,26 @@ namespace SPTrApp.SPTrEngine
             return this;
         }
 
-
-        public ConsoleRenderer()
+        ~ConsoleRenderer()
         {
-            SetScreenSize(10,10);
-            Console.OutputEncoding = Encoding.UTF8;
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if(!_disposed)
+            {
+                _disposed = true;
+                DestroyScreenHandle(null, EventArgs.Empty);
+
+                if(disposing)
+                    GC.SuppressFinalize(this);
+            }
         }
 
         public void CreateScreenHandle()
@@ -145,12 +167,14 @@ namespace SPTrApp.SPTrEngine
             //렌더링 오브젝트 정보입력 (추후에 Sorting Order 추가하기)
             foreach (var obj in objects)
             {
-                var posToInt = obj.position.ToVector2Int();
-                if (obj.Mesh != '.'
+                var posToInt = new Vector2Int((int)MathF.Round(obj.Transform.Position.x), (int)MathF.Round(obj.Transform.Position.y));
+
+                if (obj.TryGetComponent(out Mesh? m) 
+                    && (m?.MeshSet ?? '.') != '.'
                     && posToInt.x < _screenSize.x && posToInt.x >= 0
                     && posToInt.y < _screenSize.y && posToInt.y >= 0)
                 {
-                    _screen[posToInt.y, posToInt.x] = obj.Mesh;
+                    _screen[posToInt.y, posToInt.x] = m?.MeshSet ?? '.';
                 }
             }
 
