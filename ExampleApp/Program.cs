@@ -1,4 +1,5 @@
-﻿using SPTrEngine;
+﻿using SPTrApp.ExampleApp;
+using SPTrEngine;
 using SPTrEngine.Math.Vector;
 
 namespace SPTrApp
@@ -8,22 +9,26 @@ namespace SPTrApp
         [STAThread]
         internal static void Main(string[] args)
         {
-            InternalCMD.MainArgsCMD(args);
+            ApplicationConfiguration.Initialize();
 
-            GameObject player = new GameObject("Player");
-            player.AddComponent<Player>();
-            player.AddComponent<Mesh>().MeshSet = 'P';
-            player.Transform.Position = new Vector3 { x = 5, y =4 };
+            Application.Run(new Form1());
+
+            //InternalCMD.MainArgsCMD(args);
+
+            //GameObject player = new GameObject("Player");
+            //player.AddComponent<Player>();
+            //player.AddComponent<Mesh>().MeshSet = 'P';
+            //player.Transform.Position = new Vector3 { x = 5, y =4 };
 
 
-            GameObject enemy = new GameObject("Enemy");
-            enemy.AddComponent<Enemy>();
-            enemy.AddComponent<Mesh>().MeshSet = 'E';
-            enemy.Transform.Position = new Vector3 { x = 3, y = 7 };
+            //GameObject enemy = new GameObject("Enemy");
+            //enemy.AddComponent<Enemy>();
+            //enemy.AddComponent<Mesh>().MeshSet = 'E';
+            //enemy.Transform.Position = new Vector3 { x = 3, y = 7 };
 
-            BaseEngine.instance.EngineScreen.SetScreenSize(24,24);
+            //BaseEngine.instance.EngineScreen.SetScreenSize(24,24);
 
-            BaseEngine.instance.Run();
+            //BaseEngine.instance.Run();
         }
     }
 }
