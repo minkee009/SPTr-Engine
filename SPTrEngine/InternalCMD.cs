@@ -44,10 +44,15 @@ namespace SPTrEngine
                                 }
                                 else if (j == i + 3)
                                 {
-                                    pos.x = int.Parse(args[j]);
+                                    goEnabled = int.Parse(args[j]) > 0 ? true : false;
                                     argsCount++;
                                 }
                                 else if (j == i + 4)
+                                {
+                                    pos.x = int.Parse(args[j]);
+                                    argsCount++;
+                                }
+                                else if (j == i + 5)
                                 {
                                     pos.y = int.Parse(args[j]);
                                     argsCount++;
@@ -60,6 +65,7 @@ namespace SPTrEngine
                             GameObject go = new GameObject(goName);
                             go.AddComponent<Mesh>().MeshSet = goMesh;
                             go.Transform.Position = new Vector3(pos.x, pos.y,0f);
+                            go.Enabled = goEnabled;
 
                             break;
                     }
