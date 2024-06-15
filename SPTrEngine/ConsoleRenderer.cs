@@ -1,5 +1,4 @@
-﻿using SPTrEngine;
-using SPTrEngine.Extensions.Kernel32;
+﻿using SPTrEngine.Extensions.Kernel32;
 using SPTrEngine.Math.Vector;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SPTrApp.SPTrEngine
+namespace SPTrEngine
 {
     public interface IConsoleScreen
     {

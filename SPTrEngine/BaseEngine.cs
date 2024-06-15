@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 using SPTrEngine.Math.Vector;
 using System.Text;
 using SPTrEngine.Extensions.Kernel32;
-using SPTrApp.SPTrEngine;
 using Microsoft.Win32.SafeHandles;
 
 namespace SPTrEngine

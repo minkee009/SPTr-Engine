@@ -1,10 +1,5 @@
 ﻿﻿using SPTrEngine.Tools;
-using SPTrEngine.Math.Vector;
 using System.Reflection;
-using System.Collections;
-using SPTrApp.SPTrEngine;
-using System.Runtime.CompilerServices;
-using static SPTrApp.SPTrEngine.Component;
 
 namespace SPTrEngine
 {

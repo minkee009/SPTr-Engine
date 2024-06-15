@@ -1,5 +1,4 @@
-﻿using SPTrApp.SPTrEngine;
-using SPTrEngine;
+﻿using SPTrEngine;
 using SPTrEngine.Math.Vector;
 
 namespace SPTrApp

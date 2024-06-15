@@ -1,11 +1,10 @@
-﻿using SPTrEngine;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SPTrApp.SPTrEngine
+namespace SPTrEngine
 {
     public class Mesh : Component
     {

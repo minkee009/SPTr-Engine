@@ -1,5 +1,4 @@
-﻿using SPTrApp.SPTrEngine;
-using SPTrEngine;
+﻿using SPTrEngine;
 using SPTrEngine.Extensions.Kernel32;
 using SPTrEngine.Math.Vector;
 using System.Collections;
@@ -11,7 +10,6 @@ namespace SPTrApp
     public class Player : ScriptBehavior
     {
         public float moveSpeed = 8f;
-
         public float footprintTime = 0;
 
         public GameObject? projectile;

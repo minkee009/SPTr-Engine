@@ -57,7 +57,8 @@ namespace SPTrEngine
 
                             i += argsCount;
 
-                            GameObject go = new GameObject();
+                            GameObject go = new GameObject(goName);
+                            go.AddComponent<Mesh>().MeshSet = goMesh;
                             go.Transform.Position = new Vector3(pos.x, pos.y,0f);
 
                             break;
