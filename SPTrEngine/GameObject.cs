@@ -24,16 +24,7 @@ namespace SPTrEngine
         public bool Enabled
         {
             get => _enabled;
-            set
-            {
-                _enabled = value;
-
-                foreach(var component in Components)
-                {
-                    if (component is ScriptBehavior)
-                        ((ScriptBehavior)component).Enabled = value;
-                }
-            }
+            set => _enabled = value;
         }
 
         public string Hash => _hash;
@@ -143,7 +134,7 @@ namespace SPTrEngine
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T AddComponent<T>() where T : Component //, new()
+        public T AddComponent<T>() where T : Component
         {
             return (T)AddComponent(typeof(T));
         }

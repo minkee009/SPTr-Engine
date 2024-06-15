@@ -36,7 +36,7 @@ namespace SPTrApp.SPTrEngine
         }
 #pragma warning restore CS8618
 
-        public static object CreateInstance(GameObject gameObject)
+        public static Component CreateInstance(GameObject gameObject)
         {
             var instance = new Component();
 
