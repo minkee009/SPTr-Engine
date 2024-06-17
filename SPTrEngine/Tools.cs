@@ -25,6 +25,5 @@ namespace SPTrEngine.Tools
 
             return hash;
         }
-
     }
 }

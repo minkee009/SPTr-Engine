@@ -1,5 +1,6 @@
 ﻿﻿using SPTrEngine.Tools;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 
 namespace SPTrEngine
 {
@@ -27,22 +28,24 @@ namespace SPTrEngine
 
         public GameObject()
         {
+            Random hashPONum = new Random();
             name = $"[{BaseEngine.objects.Count}]GameObject";
-            _hash = HashMaker.ComputeSHA256(name);
+            _hash = HashMaker.ComputeSHA256(name + hashPONum.Next());
             _components = new List<Component>();
             Transform = Transform.CreateInstance(this);
             Components.Add(Transform);
-            BaseEngine.objects.Add(this);
+            BaseEngine.instance.RegisterGameObject(this);
         }
 
         public GameObject(string name)
         {
+            Random hashPONum = new Random();
             this.name = name;
-            _hash = HashMaker.ComputeSHA256(name);
+            _hash = HashMaker.ComputeSHA256(name + hashPONum.Next());
             _components = new List<Component>();
             Transform = Transform.CreateInstance(this);
             Components.Add(Transform);
-            BaseEngine.objects.Add(this);
+            BaseEngine.instance.RegisterGameObject(this);
         }
 
 
@@ -61,14 +64,13 @@ namespace SPTrEngine
             return _hash == other?._hash;
         }
 
-        public static GameObject? FindObjectByName(string name)
+        public static GameObject? Find(string name)
         {
             GameObject? findObj = null;
-            string toHash = HashMaker.ComputeSHA256(name);
 
-            foreach (var obj in BaseEngine.objects)
+            foreach(var obj in BaseEngine.objects)
             {
-                if (obj._hash == toHash)
+                if(obj.name == name)
                 {
                     findObj = obj;
                     break;
@@ -78,20 +80,19 @@ namespace SPTrEngine
             return findObj;
         }
 
-        public static GameObject? FindObjectByTag(string tag)
+        public static GameObject[]? FindByTag(string tag)
         {
-            GameObject? findObj = null;
+            List<GameObject> findObjs = new List<GameObject>();
             
             foreach(var obj in BaseEngine.objects)
             {
                 if (obj.tag == tag)
                 {
-                    findObj = obj;
-                    break;
+                    findObjs.Add(obj);
                 }
             }
 
-            return findObj;
+            return findObjs.Count > 0 ? findObjs.ToArray() : null;
         }
         public Component? GetComponent(Type type)
         {
