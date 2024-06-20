@@ -1,5 +1,6 @@
 ﻿﻿using SPTrEngine.Tools;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 
 namespace SPTrEngine
@@ -15,7 +16,7 @@ namespace SPTrEngine
         private string _hash;
 
         public Transform Transform { get; }
-        public IList<Component> Components { get => _components; }
+        public IReadOnlyList<Component> Components { get => _components; }
 
         public bool Enabled
         {
@@ -29,11 +30,11 @@ namespace SPTrEngine
         public GameObject()
         {
             Random hashPONum = new Random();
-            name = $"[{BaseEngine.objects.Count}]GameObject";
+            name = $"[{BaseEngine.Objects.Count}]GameObject";
             _hash = HashMaker.ComputeSHA256(name + hashPONum.Next());
             _components = new List<Component>();
             Transform = Transform.CreateInstance(this);
-            Components.Add(Transform);
+            _components.Add(Transform);
             BaseEngine.instance.RegisterGameObject(this);
         }
 
@@ -44,7 +45,7 @@ namespace SPTrEngine
             _hash = HashMaker.ComputeSHA256(name + hashPONum.Next());
             _components = new List<Component>();
             Transform = Transform.CreateInstance(this);
-            Components.Add(Transform);
+            _components.Add(Transform);
             BaseEngine.instance.RegisterGameObject(this);
         }
 
@@ -68,7 +69,7 @@ namespace SPTrEngine
         {
             GameObject? findObj = null;
 
-            foreach(var obj in BaseEngine.objects)
+            foreach(var obj in BaseEngine.Objects)
             {
                 if(obj.name == name)
                 {
@@ -84,7 +85,7 @@ namespace SPTrEngine
         {
             List<GameObject> findObjs = new List<GameObject>();
             
-            foreach(var obj in BaseEngine.objects)
+            foreach(var obj in BaseEngine.Objects)
             {
                 if (obj.tag == tag)
                 {
@@ -205,10 +206,7 @@ namespace SPTrEngine
             };
 
             _components.Add(instance);
-            if (instance is ISPTrLoop loop)
-            {
-                loop.OnInitialized();
-            }
+            instance.OnInitialized();
 
             return instance;
         }

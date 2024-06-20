@@ -29,6 +29,11 @@ namespace SPTrEngine
         }
 #pragma warning restore CS8618
 
+        /// <summary>
+        /// 사용자가 직접 컴포넌트의 인스턴스를 생성합니다.
+        /// </summary>
+        /// <param name="gameObject"></param>
+        /// <returns></returns>
         public static Component CreateInstance(GameObject gameObject)
         {
             var instance = new Component();

@@ -20,7 +20,8 @@ namespace SPTrEngine
     public class BaseEngine
     {
         public static BaseEngine instance = new BaseEngine();
-        public static List<GameObject> objects = new List<GameObject> ();
+        public static IReadOnlyList<GameObject> Objects => _objects;
+        private static List<GameObject> _objects = new List<GameObject>();
 
         private EngineState _state;
         private bool _isExit;
@@ -73,7 +74,7 @@ namespace SPTrEngine
                 _state = EngineState.FixedTick;
                 while (accumlator > 0.0)
                 {
-                    foreach (var obj in objects)
+                    foreach (var obj in _objects)
                     {
                         if (obj.Enabled)
                         {
@@ -95,7 +96,7 @@ namespace SPTrEngine
 
                 //tick
                 _state = EngineState.Tick;
-                foreach (var obj in objects)
+                foreach (var obj in _objects)
                 {
                     if (obj.Enabled)
                     {
@@ -114,7 +115,7 @@ namespace SPTrEngine
 
                 //after tick
                 _state = EngineState.AfterTick;
-                foreach (var obj in objects)
+                foreach (var obj in _objects)
                 {
                     if (obj.Enabled)
                     {
@@ -135,8 +136,8 @@ namespace SPTrEngine
 
                 //화면 처리
                 _state = EngineState.Render;
-                _consoleRenderer.Render(objects);
-                foreach (var obj in objects)
+                _consoleRenderer.Render(_objects);
+                foreach (var obj in _objects)
                 {
                     if (obj.Enabled)
                     {
@@ -170,7 +171,7 @@ namespace SPTrEngine
                 return;
 
             _hashs.Add(obj.Hash, obj.name);
-            _objCountManager.Enqueue(() => objects.Add(obj));
+            _objCountManager.Enqueue(() => _objects.Add(obj));
         }
 
         public void UnregisterGameObject(GameObject obj) 
@@ -179,7 +180,7 @@ namespace SPTrEngine
                 return;
 
             _hashs.Remove(obj.Hash);
-            _objCountManager.Enqueue(() => objects.Remove(obj));
+            _objCountManager.Enqueue(() => _objects.Remove(obj));
         }
     }
 }

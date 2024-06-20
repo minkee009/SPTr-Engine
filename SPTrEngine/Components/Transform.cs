@@ -16,7 +16,7 @@ namespace SPTrEngine
         //public Quaternion LocalRotation { get; set; }
         //public Vector3 LocalScale { get; set; }
 
-        public IList<Transform> Childs { get => _childs; }
+        public IReadOnlyList<Transform> Childs { get => _childs; }
 
         protected Transform()
         {
@@ -26,19 +26,17 @@ namespace SPTrEngine
 
         /// <summary>
         /// 게임오브젝트의 트랜스폼 컴포넌트 인스턴스를 직접 생성합니다.
-        /// 단 게임오브젝트의 트랜스폼 컴포넌트 인스턴스가 이미 존재하는 경우에는 생성하지 않습니다.
         /// </summary>
         /// <param name="go"></param>
         /// <returns></returns>
-        public static new Transform CreateInstance(GameObject go)
+        public static new Transform CreateInstance(GameObject gameObject)
         {
-            if (go.Transform != null)
-                return go.Transform;
-
             var instance = new Transform();
 
             instance.Position = Vector3.zero;
             instance.Scale = Vector3.one;
+
+            instance.GameObject = gameObject;
 
             return instance;
         }

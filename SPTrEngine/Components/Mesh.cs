@@ -17,14 +17,12 @@ namespace SPTrEngine
             _meshSet = '.';
         }
 
-        public static new Mesh CreateInstance(GameObject go)
+        public static new Mesh CreateInstance(GameObject gameObject)
         {
             var instance = new Mesh();
 
-            instance.GameObject = go;
             instance.MeshSet = '.';
-
-            go.Components.Add(instance);
+            instance.GameObject = gameObject;
 
             return instance;
         }
