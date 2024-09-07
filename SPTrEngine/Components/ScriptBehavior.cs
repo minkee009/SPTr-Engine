@@ -8,18 +8,6 @@ using System.Threading.Tasks;
 
 namespace SPTrEngine
 {
-    public interface ISPTrLoop
-    {
-        public void Awake();
-        public void OnInitialized();
-        public void OnEnable();
-        public void OnDisable();
-        public void Start();
-        public void FixedTick();
-        public void Tick();
-        public void AfterTick();
-    }
-
     public class ScriptBehavior : Component, ISPTrLoop
     {
         private bool _enabled = true;
