@@ -68,7 +68,7 @@ namespace SPTrEngine
                 }
 
                 _state = EngineState.CheckInput;
-                Input.SetInput();
+                Input.ScanInput();
 
                 //fixedTick
                 _state = EngineState.FixedTick;

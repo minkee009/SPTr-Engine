@@ -54,9 +54,9 @@ namespace SPTrEngine
         }
 
         /// <summary>
-        /// 인풋을 설정합니다
+        /// 입력을 탐지합니다
         /// </summary>
-        public static void SetInput()
+        public static void ScanInput()
         {
             Array.Copy(_currentInput,_oldInput,_currentInput.Length);
             Array.Clear(_currentInput, 0, _currentInput.Length);
