@@ -15,8 +15,7 @@ namespace SPTrEngine
 
             set
             {
-                if (_gameObject == null)
-                    _gameObject = value;
+                _gameObject ??= value;
             }
         }
 

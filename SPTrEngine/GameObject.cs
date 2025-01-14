@@ -31,7 +31,7 @@ namespace SPTrEngine
         {
             Random hashPONum = new Random();
             name = $"[{BaseEngine.Objects.Count}]GameObject";
-            _hash = HashMaker.ComputeSHA256(name + hashPONum.Next());
+            _hash = HashMaker.ComputeSHA256(name + hashPONum.Next() + BaseEngine.Objects.Count);
             _components = new List<Component>();
             Transform = Transform.CreateInstance(this);
             _components.Add(Transform);
@@ -42,7 +42,7 @@ namespace SPTrEngine
         {
             Random hashPONum = new Random();
             this.name = name;
-            _hash = HashMaker.ComputeSHA256(name + hashPONum.Next());
+            _hash = HashMaker.ComputeSHA256(name + hashPONum.Next() + BaseEngine.Objects.Count);
             _components = new List<Component>();
             Transform = Transform.CreateInstance(this);
             _components.Add(Transform);
@@ -211,7 +211,12 @@ namespace SPTrEngine
             return instance;
         }
 
-        public void Destroy(Component component)
+        public static void Destroy(Component component)
+        {
+
+        }
+
+        public static void Destroy(GameObject gameObject)
         {
 
         }
