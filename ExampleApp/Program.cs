@@ -1,22 +1,46 @@
-﻿using SPTrEngine;
-using SPTrEngine.Math;
+﻿using SPTrApp.ExampleApp;
+using SPTrEngine;
+using SPTrEngine.Math.Vector;
 
 namespace SPTrApp
 {
     internal static class Program
     {
+        [STAThread]
         internal static void Main(string[] args)
         {
-            Enemy enemy = new Enemy('E');
-            enemy.name += " | enemy";
-            enemy.position = new Vector2 { x = 3, y = 7 };
+            //AsyncSubRoutine routine = new AsyncSubRoutine(
+            //    new Delegate[]
+            //    {
+            //        () => { Console.WriteLine("씨발"); },
+            //        () => { Console.WriteLine("페이즈2"); },
+            //        () => { return 42; }
+            //    }
+            //);
 
-            Player player = new Player('P');
-            player.name += " | player";
-            player.position = new Vector2 { x = 5, y = 4 };
-            player.tag = "P";
 
-            BaseEngine.Run();
+            //while (routine.MoveNext())
+            //{
+            //    Console.WriteLine("좆까");
+            //    Console.WriteLine(routine.Current ?? "없어욥");
+            //}
+
+            InternalCMD.MainArgsCMD(args);
+
+            GameObject player = new GameObject("Player");
+            player.AddComponent<Player>();
+            player.AddComponent<Mesh>().MeshSet = 'P';
+            player.Transform.Position = new Vector3 { x = 5, y = 4 };
+
+
+            GameObject enemy = new GameObject("Enemy");
+            enemy.AddComponent<Enemy>();
+            enemy.AddComponent<Mesh>().MeshSet = 'E';
+            enemy.Transform.Position = new Vector3 { x = 3, y = 7 };
+
+            BaseEngine.instance.EngineScreen.SetScreenSize(24, 24);
+
+            BaseEngine.instance.Run();
         }
     }
 }

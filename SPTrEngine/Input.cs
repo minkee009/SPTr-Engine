@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using Silk.NET.Input;
 
 namespace SPTrEngine
@@ -127,9 +127,9 @@ namespace SPTrEngine
         }
 
         /// <summary>
-        /// 인풋을 설정합니다
+        /// 입력을 탐지합니다
         /// </summary>
-        public static void SetInput(IReadOnlyList<IKeyboard> keyboards)
+        public static void ScanInput(IReadOnlyList<IKeyboard> keyboards)
         {
             Array.Copy(_currentInput, _oldInput, _currentInput.Length);
             Array.Clear(_currentInput, 0, _currentInput.Length);

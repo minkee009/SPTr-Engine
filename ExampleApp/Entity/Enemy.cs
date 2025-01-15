@@ -3,13 +3,8 @@ using SPTrEngine.Math;
 
 namespace SPTrApp
 {
-    public class Enemy : GameObject
+    public class Enemy : ScriptBehavior
     {
-        public Enemy(char mesh = 'E')
-        {
-            _mesh = mesh;
-        }
-
         int _internalTickCount = 0;
 
         public override void FixedTick()
@@ -21,10 +16,14 @@ namespace SPTrApp
 
             if (_internalTickCount == 0)
             {
-                position += Vector2.Up;
+                Transform.Position += Vector3.up;
             }
 
-            position.y %= BaseEngine.ScreenSize.y;
+            var currentPos = Transform.Position;
+
+            currentPos.y %= BaseEngine.instance.EngineScreen.ScreenSize.y;
+
+            Transform.Position = currentPos;
         }
     }
 }

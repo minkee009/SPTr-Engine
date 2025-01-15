@@ -1,11 +1,16 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
 using Silk.NET.OpenGL;
-using SPTrEngine.Math;
+using System.Runtime.InteropServices;
+using SPTrEngine.Math.Vector;
+using System.Text;
+using SPTrEngine.Extensions.Kernel32;
+using Microsoft.Win32.SafeHandles;
+using System.Security.Policy;
 
 namespace SPTrEngine
 {
@@ -18,53 +23,76 @@ namespace SPTrEngine
         Render = 4,
     }
 
-    public static class BaseEngine
+    public class BaseEngine
     {
-        public static List<GameObject> objects = new List<GameObject>();
+        public static BaseEngine instance = new BaseEngine();
+        public IReadOnlyList<GameObject> Objects => _objects;
+        private List<GameObject> _objects = new List<GameObject>();
 
-        public static string windowTitle = "SPTr Engine";
+        private EngineState _state;
+        private bool _isExit;
+        private ConsoleRenderer _consoleRenderer;
+        private Queue<Action> _objCountManager;
+        private Dictionary<string, string> _hashs;
 
-        private static bool _isRunning = false;
+        public string windowTitle = "SPTr Engine";
 
-        private static EngineState _state;
-
-        //윈도우(창) 및 게임 스크린
-        public static bool VSync
+                //윈도우(창) 및 게임 스크린
+        public bool VSync
         {
             get => _window.VSync; 
             set => _window.VSync = value;
+	    }
+
+        public IConsoleScreen EngineScreen => _consoleRenderer;
+
+        public EngineState State => _state;
+
+        BaseEngine()
+        {
+            _state = EngineState.CheckInput;
+            _isExit = false;
+            _consoleRenderer = new ConsoleRenderer();
+            _objCountManager = new Queue<Action>();
+            _hashs = new Dictionary<string, string>();
         }
 
-        private static IWindow _window;
-        private static WindowOptions _wOptions = WindowOptions.Default with { Size = new Vector2D<int>(640, 480) , Title = windowTitle };
-        private static Vector2Int _screenSize;
+        private IWindow _window;
+        private WindowOptions _wOptions = WindowOptions.Default with { Size = new Vector2D<int>(640, 480) , Title = windowTitle };
+        private Vector2Int _screenSize;
 
         //렌더러
-        private static GL _gl;
-        private static uint _vao;
-        private static uint _vbo;
-        private static uint _ebo;
-        private static uint _program;
+        private GL _gl;
+        private uint _vao;
+        private uint _vbo;
+        private uint _ebo;
+        private uint _program;
 
         //엔진 틱
-        private static double _accumlator = 0;
-        private static long _frameCount = 0;
-        private static int _frameLimit = 120;
+        private double _accumlator = 0;
+        private long _frameCount = 0;
+        private int _frameLimit = 120;
 
         //엔진 컨텍스트 
-        private static IInputContext _inputContext;
+        private IInputContext _inputContext;
 
         //프로퍼티
-        public static bool IsRunning => _isRunning;
-        public static long FrameCount => _frameCount;
-        public static Vector2Int ScreenSize => _screenSize;
+        public bool IsRunning => _isRunning;
+        public long FrameCount => _frameCount;
+        public Vector2Int ScreenSize => _screenSize;
 
-        public static EngineState State => _state;
+        public EngineState State => _state;
 
-        public static void Run()
+        public void Run()
         {
+            Kernel32.Beep(200, 55);
+            Kernel32.Beep(350, 30);
+            Kernel32.Beep(240, 55);
             Stopwatch stopwatch = Stopwatch.StartNew();
-            _isRunning = true;
+
+            _consoleRenderer.CreateScreenHandle();
+
+            double accumlator = 0;
 
             CreateWindow();
 
@@ -85,7 +113,7 @@ namespace SPTrEngine
                 Time.deltaTime = currentTime - Time.time;
                 Time.time = currentTime;
 
-                _accumlator += Time.deltaTime;
+                accumlator += Time.deltaTime;
 
                 if (!VSync && _frameLimit > 0)
                 {
@@ -98,46 +126,76 @@ namespace SPTrEngine
                         Thread.Sleep((int)waitTime);
                     }
                 }
+                
+                //오브젝트 등록관리
+                while (_objCountManager.Count > 0)
+                {
+                    _objCountManager.Dequeue().Invoke();
+                }
 
                 _state = EngineState.CheckInput;
-                Input.SetInput(_inputContext.Keyboards);
+                Input.ScanInput(_inputContext.Keyboards);
 
                 //fixedTick
                 _state = EngineState.FixedTick;
-                while (_accumlator > 0.0)
+                while (accumlator > 0.0)
                 {
-                    foreach (var obj in objects)
+                    foreach (var obj in _objects)
                     {
                         if (obj.Enabled)
                         {
-                            obj.FixedTick();
-                            obj.CheckYield();
-                        }
-                    }
-                    _accumlator -= Time.fixedDeltaTime;
+                            foreach (var com in obj.Components)
+                            {
+                                var script = com as ScriptBehavior;
 
+                                if (script?.Enabled ?? false)
+                                {
+                                    script.FixedTick();
+                                    script.CheckYield();
+                                }
+                            }
+                        }
+
+                    }
+                    accumlator -= Time.fixedDeltaTime;
                     fps = 1.0f / (float)Time.deltaTime;
                 }
 
                 //tick
                 _state = EngineState.Tick;
-                foreach (var obj in objects)
+                foreach (var obj in _objects)
                 {
-                    if(obj.Enabled)
+                    if (obj.Enabled)
                     {
-                        obj.Tick();
-                        obj.CheckYield();
+                        foreach (var com in obj.Components)
+                        {
+                            var script = com as ScriptBehavior;
+
+                            if (script?.Enabled ?? false)
+                            {
+                                script.Tick();
+                                script.CheckYield();
+                            }
+                        }
                     }
                 }
 
                 //after tick
                 _state = EngineState.AfterTick;
-                foreach (var obj in objects)
+                foreach (var obj in _objects)
                 {
                     if (obj.Enabled)
                     {
-                        obj.AfterTick();
-                        obj.CheckYield();
+                        foreach (var com in obj.Components)
+                        {
+                            var script = com as ScriptBehavior;
+
+                            if (script?.Enabled ?? false)
+                            {
+                                script.AfterTick();
+                                script.CheckYield();
+                            }
+                        }
                     }
                 }
 
@@ -146,11 +204,20 @@ namespace SPTrEngine
                 //화면 처리
                 _state = EngineState.Render;
                 Render();
-                foreach (var obj in objects)
+                _consoleRenderer.Render(_objects);
+                foreach (var obj in _objects)
                 {
                     if (obj.Enabled)
                     {
-                        obj.CheckYield();
+                        foreach (var com in obj.Components)
+                        {
+                            var script = com as ScriptBehavior;
+
+                            if (script?.Enabled ?? false)
+                            {
+                                script.CheckYield();
+                            }
+                        }
                     }
                 }
 
@@ -162,7 +229,7 @@ namespace SPTrEngine
 
         
 
-        public static unsafe void Render()
+        public unsafe void Render()
         {
             _window.DoEvents();
             _window.DoUpdate();
@@ -178,32 +245,32 @@ namespace SPTrEngine
             //_window.SwapBuffers();
         }
 
-        public static void SetScreenSize(int x, int y)
+        public void SetScreenSize(int x, int y)
         {
             _screenSize = new Vector2Int(x, y);
             _wOptions.Size = new Vector2D<int>(x, y);
         }
 
-        public static void Exit()
+        public void Exit()
         {
             _isRunning = false;
             _inputContext?.Dispose();
             _gl?.Dispose();
         }
 
-        public static void Dispose()
+        public void Dispose()
         {
 
         }
 
-        private static unsafe void StartOpenGL()
+        private unsafe void StartOpenGL()
         {
             _gl = _window.CreateOpenGL();
             _gl.ClearColor(Color.CornflowerBlue);
             InitOpenGLResource();
         }
 
-        private static unsafe void InitOpenGLResource()
+        private unsafe void InitOpenGLResource()
         {
             _vao = _gl.GenVertexArray();
             _gl.BindVertexArray(_vao);
@@ -296,7 +363,7 @@ void main()
             _gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, 0);
         }
 
-        private static void CreateWindow()
+        private void CreateWindow()
         {
             if (_window == null)
             {
@@ -306,11 +373,33 @@ void main()
             }
         }
 
-        private static void CloseWindow()
+        private void CloseWindow()
         {
             _window.Close();
         }
 
+        public void Dispose()
+        {
+
+        }
+
+        public void RegisterGameObject(GameObject obj)
+        {
+            if (_hashs.ContainsKey(obj.Hash))
+                return;
+
+            _hashs.Add(obj.Hash, obj.name);
+            _objCountManager.Enqueue(() => _objects.Add(obj));
+        }
+
+        public void UnregisterGameObject(GameObject obj) 
+        {
+            if (!_hashs.ContainsKey(obj.Hash))
+                return;
+
+            _hashs.Remove(obj.Hash);
+            _objCountManager.Enqueue(() => _objects.Remove(obj));
+        }
     }
 }
 

@@ -1,180 +1,56 @@
-﻿using SPTrEngine.Tools;
+using SPTrEngine.Tools;
 using SPTrEngine.Math;
 using System.Reflection;
 using System.Collections;
 using Silk.NET.Vulkan;
 using Silk.NET.OpenGL;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace SPTrEngine
 {
-    public interface ISptrObject
+    public sealed class GameObject : IDisposable, IEquatable<GameObject>
     {
-        public void Awake();
-        public void OnEnable();
-        public void OnDisable();
-        public void Start();
-        public void FixedTick();
-        public void Tick();
-        public void AfterTick();
-    }
-
-    public class GameObject : IDisposable, IEquatable<GameObject>, ISptrObject
-    {
-        public Vector2 position = new Vector2(0, 0);
         public string name = "";
         public string tag = "";
         public int layer = 0;
 
+        private bool _enabled = true;
+        private List<Component> _components;
+        private string _hash;
+
+        public Transform Transform { get; }
+        public IReadOnlyList<Component> Components { get => _components; }
+
         public bool Enabled
         {
             get => _enabled;
-            set
-            {
-                _lastEnabled = _enabled;
-                _enabled = value;
-
-                if (_lastEnabled != _enabled)
-                {
-                    if(_enabled)
-                    {
-                        OnEnable();
-                        if (!_startHasExcute)
-                        {
-                            Start();
-                            _startHasExcute = true;
-                        }
-                    }
-                    else
-                        OnDisable();
-                }
-            }
+            set => _enabled = value;
         }
+
         public string Hash => _hash;
-        public char Mesh => _mesh;
 
-        protected char _mesh = '.';
-        protected bool _enabled = true;
-        protected bool _lastEnabled = true;
-
-        private string _hash;
-        private bool _startHasExcute = false;
-        private Dictionary<string,Coroutine> _activatedCoroutines = new Dictionary<string, Coroutine>();
-        private static List<string> _needStopRoutines = new List<string>(8);
-
-        public GameObject(string name, char mesh = '.', bool enabled = true)
+        public GameObject()
         {
-            position = Vector2.Zero;
+            Random hashPONum = new Random();
+            name = $"[{BaseEngine.Objects.Count}]GameObject";
+            _hash = HashMaker.ComputeSHA256(name + hashPONum.Next() + BaseEngine.Objects.Count);
+            _components = new List<Component>();
+            Transform = Transform.CreateInstance(this);
+            _components.Add(Transform);
+            BaseEngine.instance.RegisterGameObject(this);
+        }
+
+        public GameObject(string name)
+        {
+            Random hashPONum = new Random();
             this.name = name;
-            _hash = HashMaker.ComputeSHA256(name);
-            _mesh = mesh;
-
-            BaseEngine.objects.Add(this);
-            Awake();
-
-            _enabled = enabled;
-            _lastEnabled = enabled;
-            if (_enabled)
-            {
-                OnEnable();
-                Start();
-            }
-        }
-
-        public GameObject(char mesh = '.')
-        {
-            position = Vector2.Zero;
-            name = $"GameObject[{BaseEngine.objects.Count}]";
-            _hash = HashMaker.ComputeSHA256(name);
-            _mesh = mesh;
-
-            BaseEngine.objects.Add(this);
-            Awake();
-            OnEnable();
-            Start();
-        }
-
-        public virtual void OnEnable()
-        {
-
-        }
-
-        public virtual void OnDisable()
-        {
-
-        }
-
-        public virtual void Awake()
-        {
-
-        }
-
-        public virtual void Start()
-        {
-
-        }
-
-        public virtual void FixedTick()
-        {
-
-        }
-
-        public virtual void Tick()
-        {
-
-        }
-
-        public virtual void AfterTick()
-        {
-
-        }
-
-        public void CheckYield()
-        {
-            foreach (var r in _activatedCoroutines.Values.ToArray())
-            {
-                if (r.Callable() && !r.MoveNext())
-                    _needStopRoutines.Add(r.methodName);
-            }
-
-            if(_needStopRoutines.Count > 0 )
-            {
-                foreach(var name in _needStopRoutines)
-                    StopCoroutine(name);
-            }
-            _needStopRoutines.Clear();
-        }
-
-        public Coroutine? StartCoroutine(string methodName)
-        {
-            MethodInfo? routineInfo = GetType().GetMethod(methodName);
-
-            if (routineInfo != null
-                && routineInfo.ReturnType == typeof(IEnumerator)
-                && !_activatedCoroutines.ContainsKey(methodName))
-            {
-                _activatedCoroutines.Add(methodName, new Coroutine(methodName, (IEnumerator)routineInfo.Invoke(this, null), null));
-                _activatedCoroutines[methodName]?.MoveNext();
-                return _activatedCoroutines[methodName];
-            }
-
-            else
-                return null;
-
-        }
-
-        public void StopCoroutine(string methodName)
-        {
-            if (_activatedCoroutines.ContainsKey(methodName) 
-                && _activatedCoroutines[methodName].waitOption is Coroutine)
-            {
-                StopCoroutine(((Coroutine)_activatedCoroutines[methodName].waitOption).methodName);
-            }
-            _activatedCoroutines.Remove(methodName);
-        }
-
-        public void StopAllCoroutines()
-        {
-            _activatedCoroutines.Clear();
+            _hash = HashMaker.ComputeSHA256(name + hashPONum.Next() + BaseEngine.Objects.Count);
+            _components = new List<Component>();
+            Transform = Transform.CreateInstance(this);
+            _components.Add(Transform);
+            BaseEngine.instance.RegisterGameObject(this);
         }
 
         public void SetEnabled(bool enabled)
@@ -192,14 +68,13 @@ namespace SPTrEngine
             return _hash == other?._hash;
         }
 
-        public static GameObject? FindObjectByName(string name)
+        public static GameObject? Find(string name)
         {
             GameObject? findObj = null;
-            string toHash = HashMaker.ComputeSHA256(name);
 
-            foreach (var obj in BaseEngine.objects)
+            foreach(var obj in BaseEngine.Objects)
             {
-                if (obj._hash == toHash)
+                if(obj.name == name)
                 {
                     findObj = obj;
                     break;
@@ -209,20 +84,144 @@ namespace SPTrEngine
             return findObj;
         }
 
-        public static GameObject? FindObjectByTag(string tag)
+        public static GameObject[]? FindByTag(string tag)
         {
-            GameObject? findObj = null;
+            List<GameObject> findObjs = new List<GameObject>();
             
-            foreach(var obj in BaseEngine.objects)
+            foreach(var obj in BaseEngine.Objects)
             {
                 if (obj.tag == tag)
                 {
-                    findObj = obj;
-                    break;
+                    findObjs.Add(obj);
                 }
             }
 
-            return findObj;
+            return findObjs.Count > 0 ? findObjs.ToArray() : null;
+        }
+        public Component? GetComponent(Type type)
+        {
+            for (int i = 0; i < _components.Count; i++)
+            {
+                if (_components[i].GetType() == type)
+                    return _components[i];
+            }
+
+            return null;
+        }
+
+        public T? GetComponent<T>() where T : Component
+        {
+            return GetComponent(typeof(T)) as T;
+        }
+
+        public bool TryGetComponent<T>(out T? component) where T : Component
+        {
+            component = null;
+            for (int i = 0; i < _components.Count; i++)
+            {
+                if (_components[i] is T validComponent)
+                {
+                    component = validComponent;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Component를 추가합니다. 리플렉션을 사용하는 함수입니다.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T AddComponent<T>() where T : Component
+        {
+            return (T)AddComponent(typeof(T));
+        }
+
+
+        /// <summary>
+        /// 타입을 사용하여 Component를 추가합니다. 리플렉션을 사용하는 함수입니다.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public Component AddComponent(Type type)
+        {
+            for (int i = 0; i < _components.Count; i++)
+            {
+                if (_components[i].GetType() == type)
+                    return _components[i];
+            }
+
+            Component? instance;
+
+            try
+            {
+                MethodInfo? createInstance = type.GetMethod("CreateInstance");
+
+                if(createInstance != null) 
+                {
+                    instance = (Component?)createInstance.Invoke(null, new object[] { this });
+                }
+                else
+                {
+                    instance = (Component?)(type.GetConstructor(
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, 
+                        null, 
+                        Type.EmptyTypes,
+                        null)?.Invoke(null));
+                }
+            }
+            catch
+            {
+                throw new NullReferenceException();
+            }
+
+            if(instance == null)
+                throw new NullReferenceException();
+
+            instance.GameObject = this;
+
+            _components.Add(instance);
+            if (instance is ISPTrLoop loop)
+            {
+                loop.OnInitialized();
+            }
+
+            return instance;
+        }
+
+        /// <summary>
+        /// ScriptBehavior를 추가합니다. (리플렉션을 사용하지 않습니다.)
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T AddScript<T>() where T : ScriptBehavior, new()
+        {
+            for (int i = 0; i < _components.Count; i++)
+            {
+                if (_components[i] is T validComponent)
+                    return validComponent;
+            }
+            T instance = new()
+            {
+                GameObject = this
+            };
+
+            _components.Add(instance);
+            instance.OnInitialized();
+
+            return instance;
+        }
+
+        public static void Destroy(Component component)
+        {
+
+        }
+
+        public static void Destroy(GameObject gameObject)
+        {
+
         }
     }
 }

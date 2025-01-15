@@ -19,7 +19,7 @@ namespace SPTrEngine
         private double _checkTime;
         private float _sec;
 
-        public WaitForSeconds(float sec) 
+        public WaitForSeconds(float sec)
         {
             _sec = sec;
             Reset();
@@ -28,7 +28,7 @@ namespace SPTrEngine
         public override bool Callable()
         {
             bool check = _checkTime <= Time.time;
-            if(check)
+            if (check)
             {
                 Reset();
             }
@@ -46,7 +46,7 @@ namespace SPTrEngine
     {
         public override bool Callable()
         {
-            return BaseEngine.State == EngineState.FixedTick;
+            return BaseEngine.instance.State == EngineState.FixedTick;
         }
         public override void Reset()
         {
@@ -58,16 +58,16 @@ namespace SPTrEngine
     {
         public override bool Callable()
         {
-            return BaseEngine.State == EngineState.Render;
+            return BaseEngine.instance.State == EngineState.Render;
         }
 
         public override void Reset()
         {
-            
+
         }
     }
 
-    public class WaitUntil :YieldInstruction
+    public class WaitUntil : YieldInstruction
     {
         public Func<bool> func;
 
@@ -83,7 +83,6 @@ namespace SPTrEngine
 
         public override void Reset()
         {
-            
         }
     }
 
@@ -92,10 +91,10 @@ namespace SPTrEngine
         public string methodName;
         public IEnumerator enumerator;
         public YieldInstruction? waitOption;
-        public bool Done => _done;
 
         private bool _done = false;
 
+        public bool Done => _done;
 
         public Coroutine(string methodName, IEnumerator enumerator, YieldInstruction? waitOption)
         {
@@ -109,7 +108,7 @@ namespace SPTrEngine
             if (waitOption is Coroutine)
                 return ((Coroutine)waitOption).Done;
             else
-                return waitOption?.Callable() ?? BaseEngine.State == EngineState.Tick;
+                return waitOption?.Callable() ?? BaseEngine.instance.State == EngineState.Tick;
         }
 
         public bool MoveNext()
@@ -127,13 +126,12 @@ namespace SPTrEngine
                     waitOption = (YieldInstruction)enumerator.Current;
                     waitOption.Reset();
                 }
-                    
-                else 
+
+                else
                     waitOption = null;
 
                 return true;
             }
-            
         }
 
         public override void Reset()
