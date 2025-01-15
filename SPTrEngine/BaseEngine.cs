@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Drawing;
 using Silk.NET.Input;
@@ -7,7 +7,6 @@ using Silk.NET.Windowing;
 using Silk.NET.OpenGL;
 using System.Runtime.InteropServices;
 using System.Text;
-using SPTrEngine.Extensions.Kernel32;
 using Microsoft.Win32.SafeHandles;
 using System.Security.Policy;
 
@@ -80,9 +79,6 @@ namespace SPTrEngine
 
         public void Run()
         {
-            Kernel32.Beep(200, 55);
-            Kernel32.Beep(350, 30);
-            Kernel32.Beep(240, 55);
             Stopwatch stopwatch = Stopwatch.StartNew();
 
             //_consoleRenderer.CreateScreenHandle();

@@ -1,5 +1,4 @@
 ﻿using SPTrEngine;
-using SPTrEngine.Extensions.Kernel32;
 using System.Numerics;
 using System.Collections;
 using System.Security.Cryptography.X509Certificates;
@@ -29,7 +28,6 @@ namespace SPTrApp
 
             if (footprintTime > 0.7)
             {
-                Kernel32.Beep(300, 25);
                 footprintTime = 0;
             }
 
