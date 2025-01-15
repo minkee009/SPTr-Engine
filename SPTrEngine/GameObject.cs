@@ -1,10 +1,9 @@
 using SPTrEngine.Tools;
-using SPTrEngine.Math;
+using System.Numerics;
 using System.Reflection;
 using System.Collections;
 using Silk.NET.Vulkan;
 using Silk.NET.OpenGL;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 
@@ -34,8 +33,8 @@ namespace SPTrEngine
         public GameObject()
         {
             Random hashPONum = new Random();
-            name = $"[{BaseEngine.Objects.Count}]GameObject";
-            _hash = HashMaker.ComputeSHA256(name + hashPONum.Next() + BaseEngine.Objects.Count);
+            name = $"[{BaseEngine.instance.Objects.Count}]GameObject";
+            _hash = HashMaker.ComputeSHA256(name + hashPONum.Next() + BaseEngine.instance.Objects.Count);
             _components = new List<Component>();
             Transform = Transform.CreateInstance(this);
             _components.Add(Transform);
@@ -46,7 +45,7 @@ namespace SPTrEngine
         {
             Random hashPONum = new Random();
             this.name = name;
-            _hash = HashMaker.ComputeSHA256(name + hashPONum.Next() + BaseEngine.Objects.Count);
+            _hash = HashMaker.ComputeSHA256(name + hashPONum.Next() + BaseEngine.instance.Objects.Count);
             _components = new List<Component>();
             Transform = Transform.CreateInstance(this);
             _components.Add(Transform);
@@ -72,7 +71,7 @@ namespace SPTrEngine
         {
             GameObject? findObj = null;
 
-            foreach(var obj in BaseEngine.Objects)
+            foreach(var obj in BaseEngine.instance.Objects)
             {
                 if(obj.name == name)
                 {
@@ -88,7 +87,7 @@ namespace SPTrEngine
         {
             List<GameObject> findObjs = new List<GameObject>();
             
-            foreach(var obj in BaseEngine.Objects)
+            foreach(var obj in BaseEngine.instance.Objects)
             {
                 if (obj.tag == tag)
                 {

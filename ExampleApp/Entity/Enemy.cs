@@ -1,5 +1,5 @@
 ﻿using SPTrEngine;
-using SPTrEngine.Math;
+using System.Numerics;
 
 namespace SPTrApp
 {
@@ -16,12 +16,12 @@ namespace SPTrApp
 
             if (_internalTickCount == 0)
             {
-                Transform.Position += Vector3.up;
+                Transform.Position += Vector3.UnitY;
             }
 
             var currentPos = Transform.Position;
 
-            currentPos.y %= BaseEngine.instance.EngineScreen.ScreenSize.y;
+            currentPos.Y %= 24;
 
             Transform.Position = currentPos;
         }

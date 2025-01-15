@@ -6,7 +6,6 @@ using Silk.NET.Maths;
 using Silk.NET.Windowing;
 using Silk.NET.OpenGL;
 using System.Runtime.InteropServices;
-using SPTrEngine.Math.Vector;
 using System.Text;
 using SPTrEngine.Extensions.Kernel32;
 using Microsoft.Win32.SafeHandles;
@@ -31,7 +30,7 @@ namespace SPTrEngine
 
         private EngineState _state;
         private bool _isExit;
-        private ConsoleRenderer _consoleRenderer;
+        //private ConsoleRenderer _consoleRenderer;
         private Queue<Action> _objCountManager;
         private Dictionary<string, string> _hashs;
 
@@ -44,7 +43,7 @@ namespace SPTrEngine
             set => _window.VSync = value;
 	    }
 
-        public IConsoleScreen EngineScreen => _consoleRenderer;
+        //public IConsoleScreen EngineScreen => _consoleRenderer;
 
         public EngineState State => _state;
 
@@ -52,14 +51,13 @@ namespace SPTrEngine
         {
             _state = EngineState.CheckInput;
             _isExit = false;
-            _consoleRenderer = new ConsoleRenderer();
+            //_consoleRenderer = new ConsoleRenderer();
             _objCountManager = new Queue<Action>();
             _hashs = new Dictionary<string, string>();
         }
 
         private IWindow _window;
-        private WindowOptions _wOptions = WindowOptions.Default with { Size = new Vector2D<int>(640, 480) , Title = windowTitle };
-        private Vector2Int _screenSize;
+        private WindowOptions _wOptions = WindowOptions.Default with { Size = new Vector2D<int>(640, 480) , Title = "SPTr Engine" };
 
         //렌더러
         private GL _gl;
@@ -77,11 +75,8 @@ namespace SPTrEngine
         private IInputContext _inputContext;
 
         //프로퍼티
-        public bool IsRunning => _isRunning;
+        public bool IsRunning => !_isExit;
         public long FrameCount => _frameCount;
-        public Vector2Int ScreenSize => _screenSize;
-
-        public EngineState State => _state;
 
         public void Run()
         {
@@ -90,7 +85,7 @@ namespace SPTrEngine
             Kernel32.Beep(240, 55);
             Stopwatch stopwatch = Stopwatch.StartNew();
 
-            _consoleRenderer.CreateScreenHandle();
+            //_consoleRenderer.CreateScreenHandle();
 
             double accumlator = 0;
 
@@ -104,7 +99,7 @@ namespace SPTrEngine
 
             var fps = 0.0f;
 
-            while (_isRunning)
+            while (!_isExit)
             {
                 _window.Title = $"{windowTitle} - 엔진 실행 중 , 프레임 카운트 : {FrameCount} , {MathF.Round(fps,2)}fps";
                 
@@ -161,6 +156,10 @@ namespace SPTrEngine
                     fps = 1.0f / (float)Time.deltaTime;
                 }
 
+                //window polling event / update
+                _window.DoEvents();
+                _window.DoUpdate();
+
                 //tick
                 _state = EngineState.Tick;
                 foreach (var obj in _objects)
@@ -204,7 +203,7 @@ namespace SPTrEngine
                 //화면 처리
                 _state = EngineState.Render;
                 Render();
-                _consoleRenderer.Render(_objects);
+                //_consoleRenderer.Render(_objects);
                 foreach (var obj in _objects)
                 {
                     if (obj.Enabled)
@@ -231,9 +230,6 @@ namespace SPTrEngine
 
         public unsafe void Render()
         {
-            _window.DoEvents();
-            _window.DoUpdate();
-
             _gl.Clear(ClearBufferMask.ColorBufferBit);
 
             _gl.BindVertexArray(_vao);
@@ -247,13 +243,12 @@ namespace SPTrEngine
 
         public void SetScreenSize(int x, int y)
         {
-            _screenSize = new Vector2Int(x, y);
             _wOptions.Size = new Vector2D<int>(x, y);
         }
 
         public void Exit()
         {
-            _isRunning = false;
+            _isExit = true;
             _inputContext?.Dispose();
             _gl?.Dispose();
         }
@@ -376,11 +371,6 @@ void main()
         private void CloseWindow()
         {
             _window.Close();
-        }
-
-        public void Dispose()
-        {
-
         }
 
         public void RegisterGameObject(GameObject obj)

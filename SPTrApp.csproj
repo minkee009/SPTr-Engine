@@ -7,16 +7,6 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
-
-  <PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DebugType>none</DebugType>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>none</DebugType>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Silk.NET.Input" Version="2.20.0" />
     <PackageReference Include="Silk.NET.Maths" Version="2.20.0" />
@@ -24,6 +14,9 @@
     <PackageReference Include="Silk.NET.OpenGL" Version="2.20.0" />
     <PackageReference Include="Silk.NET.Vulkan" Version="2.20.0" />
     <PackageReference Include="Silk.NET.Windowing" Version="2.20.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="SPTrEngine\RenderContext\" />
   </ItemGroup>
 
 </Project>

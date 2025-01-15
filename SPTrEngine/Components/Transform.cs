@@ -1,4 +1,4 @@
-﻿using SPTrEngine.Math.Vector;
+﻿using System.Numerics;
 
 namespace SPTrEngine
 {
@@ -11,7 +11,7 @@ namespace SPTrEngine
         public Vector3 Position { get; set; }
         //public Quaternion rotation { get; set; }
         public Vector3 Scale { get; set; }
-
+        public Quaternion Rotation { get; set; }
         //public Vector3 LocalPosition { get; set; }
         //public Quaternion LocalRotation { get; set; }
         //public Vector3 LocalScale { get; set; }
@@ -33,8 +33,9 @@ namespace SPTrEngine
         {
             var instance = new Transform();
 
-            instance.Position = Vector3.zero;
-            instance.Scale = Vector3.one;
+            instance.Position = new Vector3(0, 0, 0);
+            instance.Scale = new Vector3(1, 1, 1);
+            instance.Rotation = new Quaternion(0, 0, 0, 1);
 
             instance.GameObject = gameObject;
 

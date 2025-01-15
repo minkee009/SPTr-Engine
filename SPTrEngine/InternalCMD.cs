@@ -1,5 +1,5 @@
 ﻿using SPTrEngine;
-using SPTrEngine.Math.Vector;
+using System.Numerics;
 
 namespace SPTrEngine
 {
@@ -49,12 +49,12 @@ namespace SPTrEngine
                                 }
                                 else if (j == i + 4)
                                 {
-                                    pos.x = int.Parse(args[j]);
+                                    pos.X = int.Parse(args[j]);
                                     argsCount++;
                                 }
                                 else if (j == i + 5)
                                 {
-                                    pos.y = int.Parse(args[j]);
+                                    pos.Y = int.Parse(args[j]);
                                     argsCount++;
                                     break;
                                 }
@@ -63,8 +63,8 @@ namespace SPTrEngine
                             i += argsCount;
 
                             GameObject go = new GameObject(goName);
-                            go.AddComponent<Mesh>().MeshSet = goMesh;
-                            go.Transform.Position = new Vector3(pos.x, pos.y,0f);
+                            //go.AddComponent<MeshFilter>().MeshSet = goMesh;
+                            go.Transform.Position = new Vector3(pos.X, pos.Y,0f);
                             go.Enabled = goEnabled;
 
                             break;

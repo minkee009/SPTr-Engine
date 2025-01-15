@@ -1,6 +1,6 @@
 ﻿using SPTrEngine;
 using SPTrEngine.Extensions.Kernel32;
-using SPTrEngine.Math.Vector;
+using System.Numerics;
 using System.Collections;
 using System.Security.Cryptography.X509Certificates;
 using System.Timers;
@@ -16,45 +16,16 @@ namespace SPTrApp
         public Vector3 currentDir;
 
 
-        public IEnumerator Attack()
-        {
-            Console.WriteLine("공격모션 호출");
-            yield return new WaitForFixedTick();
-            Console.WriteLine("공격모션 시작");
-            
-            yield return StartCoroutine("Bullet");
-            Console.WriteLine("공격모션 끝");
-        }
-
-        public IEnumerator Bullet()
-        {
-            Console.WriteLine("총알출발!");
-            yield return waitSec;
-
-            yield return StartCoroutine("Smoke");
-        }
-
-        public IEnumerator Smoke()
-        {
-            Console.WriteLine("연기 나옴");
-            yield return new WaitUntil(() => _spaceCount > 8);
-            _spaceCount = 0;
-
-            Console.WriteLine("연기 사라짐");
-        }
-
-        private int _spaceCount = 0;
-
         public override void Tick()
         {
             int h = (Input.GetKey(KeyCode.UpArrow) ? 1 : 0) + (Input.GetKey(KeyCode.DownArrow) ? -1 : 0);
             int v = (Input.GetKey(KeyCode.RightArrow) ? 1 : 0) + (Input.GetKey(KeyCode.LeftArrow) ? -1 : 0);
 
-            Vector2 input = new Vector2(v, h).Normalized;
+            Vector2 input = Vector2.Normalize(new Vector2(v, h));
 
-            Transform.Position += new Vector3(input.x, input.y, 0f) * moveSpeed * (float)Time.deltaTime;
+            Transform.Position += new Vector3(input.X, input.Y, 0f) * moveSpeed * (float)Time.deltaTime;
 
-            footprintTime += input.Magnitude > 0f ? (float)Time.deltaTime : 0;
+            footprintTime += input.Length() > 0f ? (float)Time.deltaTime : 0;
 
             if (footprintTime > 0.7)
             {
@@ -62,12 +33,12 @@ namespace SPTrApp
                 footprintTime = 0;
             }
 
-            if (input.Magnitude > 0f)
+            if (input.Length() > 0f)
             {
-                currentDir = new Vector3(input.x, input.y, 0f);
+                currentDir = new Vector3(input.X, input.Y, 0f);
             }
 
-            if (Input.GetKeyDown(ConsoleKey.Z))
+            if (Input.GetKeyDown(KeyCode.Z))
             {
                 StartCoroutine("Shoot");
             }
@@ -75,10 +46,10 @@ namespace SPTrApp
 
         public IEnumerator Shoot()
         {
-            if(projectile == null)
+            if (projectile == null)
             {
                 projectile = new GameObject("Player Projectile");
-                projectile.AddComponent<Mesh>().MeshSet = 'o';
+                //projectile.AddComponent<MeshFilter>().MeshSet = 'o';
             }
             projectile.Enabled = true;
             projectile.Transform.Position = Transform.Position;

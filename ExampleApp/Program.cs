@@ -1,6 +1,6 @@
 ﻿using SPTrApp.ExampleApp;
 using SPTrEngine;
-using SPTrEngine.Math.Vector;
+using System.Numerics;
 
 namespace SPTrApp
 {
@@ -29,16 +29,12 @@ namespace SPTrApp
 
             GameObject player = new GameObject("Player");
             player.AddComponent<Player>();
-            player.AddComponent<Mesh>().MeshSet = 'P';
-            player.Transform.Position = new Vector3 { x = 5, y = 4 };
+            player.Transform.Position = new Vector3 { X = 5, Y = 4 };
 
 
             GameObject enemy = new GameObject("Enemy");
             enemy.AddComponent<Enemy>();
-            enemy.AddComponent<Mesh>().MeshSet = 'E';
-            enemy.Transform.Position = new Vector3 { x = 3, y = 7 };
-
-            BaseEngine.instance.EngineScreen.SetScreenSize(24, 24);
+            enemy.Transform.Position = new Vector3 { X = 3, Y = 7 };
 
             BaseEngine.instance.Run();
         }
