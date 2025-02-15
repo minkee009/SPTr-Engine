@@ -12,7 +12,7 @@ namespace SPTrApp
             //AsyncSubRoutine routine = new AsyncSubRoutine(
             //    new Delegate[]
             //    {
-            //        () => { Console.WriteLine("씨발"); },
+            //        () => { Console.WriteLine("페이즈1"); },
             //        () => { Console.WriteLine("페이즈2"); },
             //        () => { return 42; }
             //    }
@@ -21,7 +21,7 @@ namespace SPTrApp
 
             //while (routine.MoveNext())
             //{
-            //    Console.WriteLine("좆까");
+            //    Console.WriteLine("중간출력");
             //    Console.WriteLine(routine.Current ?? "없어욥");
             //}
 
