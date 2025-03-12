@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace SPTrApp.ExampleApp
@@ -7,7 +7,7 @@ namespace SPTrApp.ExampleApp
     {
         Delegate[] m_Routines;
 
-        Queue<Delegate> m_RoutineQueue = new Queue<Delegate>();
+        int m_index = -1;
 
         public object? Current { private set; get; }
 
@@ -19,9 +19,9 @@ namespace SPTrApp.ExampleApp
 
         public bool MoveNext(params object[] args)
         {
-            if(m_RoutineQueue.Count > 0)
+            if(m_index < m_Routines.Length)
             {
-                var routine = m_RoutineQueue.Dequeue();
+                var routine = m_Routines[m_index++];
 
                 try
                 {
@@ -30,7 +30,7 @@ namespace SPTrApp.ExampleApp
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex);
-                    m_RoutineQueue.Clear();
+                    m_index = -1;
                     return false;
                 }
                 return true;
@@ -41,10 +41,7 @@ namespace SPTrApp.ExampleApp
 
         public void Reset()
         {
-            m_RoutineQueue.Clear();
-
-            foreach (Delegate function in m_Routines)
-                m_RoutineQueue.Enqueue(function);
+            m_index = 0;
         }
     }
 }
