@@ -7,7 +7,7 @@ namespace SPTrApp.ExampleApp
     {
         Delegate[] m_Routines;
 
-        int m_index = -1;
+        int m_Index = -1;
 
         public object? Current { private set; get; }
 
@@ -19,9 +19,9 @@ namespace SPTrApp.ExampleApp
 
         public bool MoveNext(params object[] args)
         {
-            if(m_index < m_Routines.Length)
+            if(m_Index >= 0 && m_Index < m_Routines.Length)
             {
-                var routine = m_Routines[m_index++];
+                var routine = m_Routines[m_Index++];
 
                 try
                 {
@@ -30,7 +30,7 @@ namespace SPTrApp.ExampleApp
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex);
-                    m_index = -1;
+                    m_Index = -1;
                     return false;
                 }
                 return true;
@@ -41,7 +41,7 @@ namespace SPTrApp.ExampleApp
 
         public void Reset()
         {
-            m_index = 0;
+            m_Index = 0;
         }
     }
 }
